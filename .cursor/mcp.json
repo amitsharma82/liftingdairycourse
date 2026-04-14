@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "code-review-graph": {
+      "command": "code-review-graph",
+      "args": [
+        "serve"
+      ],
+      "type": "stdio"
+    },
+    "neon": {
+      "url": "https://mcp.neon.tech/mcp"
+    }
+  }
+}
