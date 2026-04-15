@@ -282,6 +282,23 @@
   z-index: 9999;
 }
 
+/* ── Calendar workout dot ────────────────────────────────── */
+.day-has-workout {
+  position: relative;
+}
+.day-has-workout::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--primary);
+  pointer-events: none;
+}
+
 /* ── Base ────────────────────────────────────────────────── */
 @layer base {
   * {
