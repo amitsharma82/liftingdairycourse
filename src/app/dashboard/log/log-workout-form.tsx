@@ -580,20 +580,36 @@ export default function LogWorkoutForm({
           subtitle="Log sets · beat your last session"
           accent={cfg.accent}
         />
-        <div className="space-y-4">
+        {/* ── Staggered exercise blocks (magic 21 pattern) ───────────────── */}
+        <motion.div
+          className="space-y-4"
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden:  {},
+            visible: { transition: { staggerChildren: 0.09, delayChildren: 0.05 } },
+          }}
+        >
           {selected.map((item, i) => (
-            <ExerciseBlock
+            <motion.div
               key={item.exercise.id}
-              exercise={item.exercise}
-              sets={item.sets}
-              alternatives={getAlternatives(item.exercise.id, item.exercise.muscleGroup)}
-              onSetsChange={(sets) => updateSets(i, sets)}
-              onRemove={() => removeExercise(i)}
-              onSwap={(newEx) => swapExercise(i, newEx)}
-              lastSession={lastSessions[item.exercise.id] ?? null}
-            />
+              variants={{
+                hidden:  { opacity: 0, y: 18 },
+                visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 110, damping: 14 } },
+              }}
+            >
+              <ExerciseBlock
+                exercise={item.exercise}
+                sets={item.sets}
+                alternatives={getAlternatives(item.exercise.id, item.exercise.muscleGroup)}
+                onSetsChange={(sets) => updateSets(i, sets)}
+                onRemove={() => removeExercise(i)}
+                onSwap={(newEx) => swapExercise(i, newEx)}
+                lastSession={lastSessions[item.exercise.id] ?? null}
+              />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
 
       <Separator />

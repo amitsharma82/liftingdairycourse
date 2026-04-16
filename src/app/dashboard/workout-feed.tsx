@@ -90,7 +90,7 @@ export default function WorkoutFeed({
         <Link
           href={`/dashboard/log?date=${date}`}
           className={buttonVariants({ variant: "outline", size: "sm" }) +
-            " tracking-[0.2em] text-xs uppercase text-primary border-primary/30 hover:bg-primary/10 hover:text-primary"}
+            " tracking-[0.2em] text-xs uppercase text-primary border-primary/30 hover:bg-primary/10 hover:text-primary btn-shine"}
         >
           + LOG ANOTHER SESSION
         </Link>
