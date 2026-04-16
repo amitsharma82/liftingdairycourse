@@ -2,7 +2,8 @@
 
 import Link                    from "next/link";
 import { motion }              from "motion/react";
-import { Timer, Dumbbell, TrendingUp } from "lucide-react";
+import { Timer, Dumbbell, TrendingUp, Flame } from "lucide-react";
+import { LogoMark }            from "@/components/logo";
 import type { getWorkoutsByDate } from "@/data/workouts";
 import {
   Card,
@@ -47,6 +48,31 @@ function fmtDuration(secs: number | null): string {
   if (secs < 60) return `${secs}s`;
   return `${Math.floor(secs / 60)}m${secs % 60 > 0 ? `${secs % 60}s` : ""}`;
 }
+
+// RPE → heat colour (inline style, not Tailwind so values are dynamic)
+function rpeColor(rpe: string | null): string {
+  if (!rpe) return "rgba(255,255,255,0.4)";
+  const v = parseFloat(rpe);
+  if (v <= 6)  return "#a3e635"; // lime  — easy
+  if (v <= 7)  return "#86efac"; // green — moderate
+  if (v <= 8)  return "#fde047"; // yellow — hard
+  if (v <= 9)  return "#fb923c"; // orange — very hard
+  return "#f87171";              // red   — maximal
+}
+
+// Muscle group → left-border accent hex
+const MUSCLE_BORDER: Record<string, string> = {
+  chest:     "#22d3ee",
+  back:      "#a3e635",
+  shoulders: "#fb923c",
+  biceps:    "#fb923c",
+  triceps:   "#fb923c",
+  legs:      "#a3e635",
+  glutes:    "#a3e635",
+  core:      "#22d3ee",
+  full_body: "#a3e635",
+  other:     "rgba(255,255,255,0.2)",
+};
 
 // Muscle group → Badge accent colour via Tailwind utility classes
 const MUSCLE_STYLE: Record<string, string> = {
@@ -105,84 +131,78 @@ function EmptyState({ date }: { date: string }) {
   const isToday = date === getTodayStr();
 
   return (
-    <div className="flex flex-col items-center justify-center py-24 text-center">
-      {/* ── Big background word (magic 21 stagger pattern) ─────────────── */}
+    <div className="flex flex-col items-center justify-center py-24 text-center relative overflow-hidden">
+
+      {/* ── LogoMark watermark ─────────────────────────────────────────── */}
       <motion.div
-        className="font-display leading-none select-none mb-8 text-primary"
-        style={{ fontSize: "clamp(6rem, 20vw, 12rem)", opacity: 0 }}
-        animate={{ opacity: 0.05, y: 0 }}
-        initial={{ opacity: 0, y: 20 }}
-        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        className="absolute inset-0 flex items-center justify-center pointer-events-none select-none"
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 0.04, scale: 1 }}
+        transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
         aria-hidden
       >
-        REST
+        <LogoMark size={340} color="#a3e635" />
       </motion.div>
 
-      {/* ── Card with staggered children (magic 21 pattern) ────────────── */}
-      <motion.div
-        initial="hidden"
-        animate="visible"
-        variants={{
-          hidden:  {},
-          visible: { transition: { staggerChildren: 0.1, delayChildren: 0.15 } },
-        }}
-        className="w-full max-w-sm"
+      {/* ── Headline ───────────────────────────────────────────────────── */}
+      <motion.p
+        className="font-mono text-xs tracking-[0.4em] uppercase text-primary mb-4"
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
       >
+        {isToday ? "TODAY" : date}
+      </motion.p>
+
+      <motion.h2
+        className="font-display leading-none tracking-widest text-foreground mb-3"
+        style={{ fontSize: "clamp(3rem, 10vw, 6rem)" }}
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+      >
+        {isToday ? "NO LIFTS YET" : "NO SESSION"}
+      </motion.h2>
+
+      <motion.p
+        className="font-mono text-sm text-muted-foreground tracking-widest uppercase mb-10 max-w-xs"
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
+      >
+        {isToday
+          ? "The iron doesn't care what you felt like."
+          : "No workout was recorded on this date."}
+      </motion.p>
+
+      {/* ── CTA ────────────────────────────────────────────────────────── */}
+      {isToday && (
         <motion.div
-          variants={{
-            hidden:  { opacity: 0, y: 16, scale: 0.97 },
-            visible: { opacity: 1, y: 0,  scale: 1, transition: { type: "spring", stiffness: 110, damping: 14 } },
-          }}
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
         >
-          <Card className="w-full relative overflow-hidden">
-            {/* Animated top bar */}
-            <motion.div
-              className="absolute top-0 left-0 right-0 h-[3px] origin-left"
-              style={{ background: "var(--primary)", boxShadow: "0 0 10px rgba(163,230,53,0.6)" }}
-              initial={{ scaleX: 0 }}
-              animate={{ scaleX: 1 }}
-              transition={{ duration: 0.9, delay: 0.3, ease: [0.43, 0.13, 0.23, 0.96] }}
-            />
-            <CardHeader className="pt-5">
-              <motion.div
-                variants={{
-                  hidden:  { opacity: 0, y: 8 },
-                  visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 120, damping: 14 } },
-                }}
-              >
-                <CardTitle className="font-display tracking-[0.15em] text-2xl text-primary">
-                  {isToday ? "REST DAY" : "NO SESSION"}
-                </CardTitle>
-              </motion.div>
-              <motion.div
-                variants={{
-                  hidden:  { opacity: 0, y: 8 },
-                  visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 120, damping: 14 } },
-                }}
-              >
-                <CardDescription>
-                  {isToday
-                    ? "The iron doesn't care what you felt like."
-                    : "No workout was recorded on this date."}
-                </CardDescription>
-              </motion.div>
-            </CardHeader>
-            {isToday && (
-              <CardContent>
-                <motion.p
-                  className="text-muted-foreground/60 text-xs tracking-widest uppercase"
-                  variants={{
-                    hidden:  { opacity: 0, y: 8 },
-                    visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 120, damping: 14 } },
-                  }}
-                >
-                  Champions are made in the sessions they show up anyway.
-                </motion.p>
-              </CardContent>
-            )}
-          </Card>
+          <Link
+            href={`/dashboard/log?date=${date}`}
+            className="inline-flex items-center gap-2 font-display tracking-[0.25em] text-sm uppercase px-8 py-4 bg-primary text-primary-foreground hover:bg-primary/90 transition-all btn-shine"
+            style={{ boxShadow: "0 0 24px rgba(163,230,53,0.35), 0 0 48px rgba(163,230,53,0.12)" }}
+          >
+            <Flame className="w-4 h-4" />
+            LOG WORKOUT
+          </Link>
         </motion.div>
-      </motion.div>
+      )}
+
+      {isToday && (
+        <motion.p
+          className="font-mono text-[10px] tracking-[0.3em] text-muted-foreground/50 uppercase mt-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+        >
+          Champions show up anyway.
+        </motion.p>
+      )}
     </div>
   );
 }
@@ -296,11 +316,12 @@ function ExerciseRow({
   isLast: boolean;
 }) {
   const { exercise, workoutSets } = workoutExercise;
-  const muscleStyle = MUSCLE_STYLE[exercise.muscleGroup] ?? MUSCLE_STYLE.other;
-  const muscleLabel = MUSCLE_LABEL[exercise.muscleGroup] ?? "OTHER";
-  const hasWeights  = workoutSets.some(s => s.weightKg);
-  const hasDuration = workoutSets.some(s => s.durationSeconds);
-  const hasRpe      = workoutSets.some(s => s.rpe);
+  const muscleStyle  = MUSCLE_STYLE[exercise.muscleGroup] ?? MUSCLE_STYLE.other;
+  const muscleLabel  = MUSCLE_LABEL[exercise.muscleGroup] ?? "OTHER";
+  const borderColor  = MUSCLE_BORDER[exercise.muscleGroup] ?? MUSCLE_BORDER.other;
+  const hasWeights   = workoutSets.some(s => s.weightKg);
+  const hasDuration  = workoutSets.some(s => s.durationSeconds);
+  const hasRpe       = workoutSets.some(s => s.rpe);
 
   const gridCols = [
     "2rem",
@@ -311,7 +332,10 @@ function ExerciseRow({
   ].filter(Boolean).join(" ");
 
   return (
-    <div className={`px-6 py-5 ${!isLast ? "border-b border-border" : ""}`}>
+    <div
+      className={`relative px-6 py-5 pl-9 ${!isLast ? "border-b border-border" : ""}`}
+      style={{ borderLeft: `3px solid ${borderColor}` }}
+    >
 
       {/* Exercise name + badge */}
       <div className="flex flex-wrap items-center gap-3 mb-4">
@@ -376,7 +400,10 @@ function ExerciseRow({
                 </span>
               )}
               {hasRpe && (
-                <span className="text-right tabular-nums text-sm text-orange-400">
+                <span
+                  className="text-right tabular-nums text-sm font-mono font-medium"
+                  style={{ color: rpeColor(set.rpe) }}
+                >
                   {set.rpe ? parseFloat(set.rpe).toFixed(1) : "—"}
                 </span>
               )}

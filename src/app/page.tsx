@@ -3,6 +3,7 @@
 import { SignInButton, SignUpButton, useAuth } from "@clerk/nextjs";
 import { BarbellHero }        from "@/components/barbell-hero";
 import { RippleButton }       from "@/components/ripple-button";
+import { ScrollReveal }       from "@/components/scroll-reveal";
 import { useState, useEffect, useCallback } from "react";
 
 const LIME   = "#a3e635";
@@ -451,11 +452,14 @@ export default function Home() {
       {/* ══════════════════════════════════════════════════════════════
           DAILY FIRE — rotating motivational quote
       ══════════════════════════════════════════════════════════════ */}
-      <MotivationalFire />
+      <ScrollReveal>
+        <MotivationalFire />
+      </ScrollReveal>
 
       {/* ══════════════════════════════════════════════════════════════
           STATS STRIP
       ══════════════════════════════════════════════════════════════ */}
+      <ScrollReveal delay={50}>
       <div
         className="grid grid-cols-3 divide-x"
         style={{
@@ -486,6 +490,8 @@ export default function Home() {
           </div>
         ))}
       </div>
+
+      </ScrollReveal>
 
       {/* ══════════════════════════════════════════════════════════════
           MARQUEE TICKER — scrolling motivational phrases
@@ -536,6 +542,7 @@ export default function Home() {
       {/* ══════════════════════════════════════════════════════════════
           FEATURES — 3 colour-coded cards
       ══════════════════════════════════════════════════════════════ */}
+      <ScrollReveal>
       <section className="px-8 md:px-16 py-20 md:py-28">
 
         <div className="flex items-center gap-4 mb-14">
@@ -580,10 +587,12 @@ export default function Home() {
           ))}
         </div>
       </section>
+      </ScrollReveal>
 
       {/* ══════════════════════════════════════════════════════════════
           IRON CODE — motivational manifesto
       ══════════════════════════════════════════════════════════════ */}
+      <ScrollReveal delay={50}>
       <section
         className="px-8 md:px-16 py-20 md:py-28 relative overflow-hidden"
         style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}
@@ -668,10 +677,12 @@ export default function Home() {
           </div>
         </div>
       </section>
+      </ScrollReveal>
 
       {/* ══════════════════════════════════════════════════════════════
           SAMPLE WORKOUT LOG
       ══════════════════════════════════════════════════════════════ */}
+      <ScrollReveal>
       <section
         className="px-8 md:px-16 py-20 md:py-28"
         style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}
@@ -740,10 +751,12 @@ export default function Home() {
           </div>
         </div>
       </section>
+      </ScrollReveal>
 
       {/* ══════════════════════════════════════════════════════════════
           FOOTER CTA
       ══════════════════════════════════════════════════════════════ */}
+      <ScrollReveal delay={50}>
       <section
         className="relative px-8 md:px-16 py-20 md:py-28 flex flex-col md:flex-row items-start md:items-center justify-between gap-10 bg-zinc-900/60"
       >
@@ -784,6 +797,7 @@ export default function Home() {
           </RippleButton>
         </SignUpButton>
       </section>
+      </ScrollReveal>
 
     </div>
   );
