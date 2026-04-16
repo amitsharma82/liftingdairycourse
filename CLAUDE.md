@@ -17,7 +17,7 @@ The `/docs` directory contains the authoritative coding standards for this proje
 
 If no docs file exists for the area you are working in, proceed with care and flag the gap to the user.
 
-## Warning: Non-standard Next.js version
+## Warning: Non-standard Next.js version.
 
 This project uses **Next.js 16.2.3** and **React 19.2.4** — versions that may differ significantly from your training data. APIs, conventions, and file structure may have breaking changes. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 
