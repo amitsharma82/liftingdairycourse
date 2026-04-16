@@ -104,33 +104,83 @@ function EmptyState({ date }: { date: string }) {
 
   return (
     <div className="flex flex-col items-center justify-center py-24 text-center">
-      <div
-        className="font-display leading-none select-none mb-8 text-primary opacity-5"
-        style={{ fontSize: "clamp(6rem, 20vw, 12rem)" }}
+      {/* ── Big background word (magic 21 stagger pattern) ─────────────── */}
+      <motion.div
+        className="font-display leading-none select-none mb-8 text-primary"
+        style={{ fontSize: "clamp(6rem, 20vw, 12rem)", opacity: 0 }}
+        animate={{ opacity: 0.05, y: 0 }}
+        initial={{ opacity: 0, y: 20 }}
+        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         aria-hidden
       >
         REST
-      </div>
+      </motion.div>
 
-      <Card className="max-w-sm w-full" style={{ borderTop: "3px solid var(--primary)" }}>
-        <CardHeader>
-          <CardTitle className="font-display tracking-[0.15em] text-2xl text-primary">
-            {isToday ? "REST DAY" : "NO SESSION"}
-          </CardTitle>
-          <CardDescription>
-            {isToday
-              ? "The iron doesn't care what you felt like."
-              : "No workout was recorded on this date."}
-          </CardDescription>
-        </CardHeader>
-        {isToday && (
-          <CardContent>
-            <p className="text-muted-foreground/60 text-xs tracking-widest uppercase">
-              Champions are made in the sessions they show up anyway.
-            </p>
-          </CardContent>
-        )}
-      </Card>
+      {/* ── Card with staggered children (magic 21 pattern) ────────────── */}
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={{
+          hidden:  {},
+          visible: { transition: { staggerChildren: 0.1, delayChildren: 0.15 } },
+        }}
+        className="w-full max-w-sm"
+      >
+        <motion.div
+          variants={{
+            hidden:  { opacity: 0, y: 16, scale: 0.97 },
+            visible: { opacity: 1, y: 0,  scale: 1, transition: { type: "spring", stiffness: 110, damping: 14 } },
+          }}
+        >
+          <Card className="w-full relative overflow-hidden">
+            {/* Animated top bar */}
+            <motion.div
+              className="absolute top-0 left-0 right-0 h-[3px] origin-left"
+              style={{ background: "var(--primary)", boxShadow: "0 0 10px rgba(163,230,53,0.6)" }}
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ duration: 0.9, delay: 0.3, ease: [0.43, 0.13, 0.23, 0.96] }}
+            />
+            <CardHeader className="pt-5">
+              <motion.div
+                variants={{
+                  hidden:  { opacity: 0, y: 8 },
+                  visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 120, damping: 14 } },
+                }}
+              >
+                <CardTitle className="font-display tracking-[0.15em] text-2xl text-primary">
+                  {isToday ? "REST DAY" : "NO SESSION"}
+                </CardTitle>
+              </motion.div>
+              <motion.div
+                variants={{
+                  hidden:  { opacity: 0, y: 8 },
+                  visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 120, damping: 14 } },
+                }}
+              >
+                <CardDescription>
+                  {isToday
+                    ? "The iron doesn't care what you felt like."
+                    : "No workout was recorded on this date."}
+                </CardDescription>
+              </motion.div>
+            </CardHeader>
+            {isToday && (
+              <CardContent>
+                <motion.p
+                  className="text-muted-foreground/60 text-xs tracking-widest uppercase"
+                  variants={{
+                    hidden:  { opacity: 0, y: 8 },
+                    visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 120, damping: 14 } },
+                  }}
+                >
+                  Champions are made in the sessions they show up anyway.
+                </motion.p>
+              </CardContent>
+            )}
+          </Card>
+        </motion.div>
+      </motion.div>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { motion }               from "motion/react";
 import { useState, useTransition } from "react";
 import { useRouter }               from "next/navigation";
 import { Button }    from "@/components/ui/button";
@@ -443,37 +444,61 @@ export default function LogWorkoutForm({
             Choose your session
           </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* ── Staggered session cards (magic 21 pattern) ─────────────── */}
+          <motion.div
+            className="grid grid-cols-1 sm:grid-cols-3 gap-4"
+            initial="hidden"
+            animate="visible"
+            variants={{
+              hidden:  {},
+              visible: { transition: { staggerChildren: 0.1, delayChildren: 0.05 } },
+            }}
+          >
             {(["push", "pull", "legs"] as const).map((type) => {
               const cfg = SESSION_CONFIG[type];
               return (
-                <Button
+                <motion.div
                   key={type}
-                  type="button"
-                  variant="outline"
-                  onClick={() => handleTypeSelect(type)}
-                  className="h-auto flex-col gap-3 py-10 border rounded-sm"
-                  style={{
-                    borderColor:     cfg.accentBorder,
-                    background:      cfg.accentBg,
+                  variants={{
+                    hidden:  { opacity: 0, y: 20, scale: 0.96 },
+                    visible: { opacity: 1, y: 0,  scale: 1, transition: { type: "spring", stiffness: 110, damping: 14 } },
                   }}
                 >
-                  <span
-                    className="font-display tracking-[0.2em] leading-none"
-                    style={{ fontSize: "clamp(2rem, 6vw, 3rem)", color: cfg.accent }}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => handleTypeSelect(type)}
+                    className="w-full h-auto flex-col gap-3 py-10 border rounded-sm relative overflow-hidden"
+                    style={{
+                      borderColor: cfg.accentBorder,
+                      background:  cfg.accentBg,
+                    }}
                   >
-                    {cfg.label}
-                  </span>
-                  <span className="text-[10px] tracking-[0.25em] text-muted-foreground">
-                    {cfg.subtitle}
-                  </span>
-                  <span className="text-[10px] tracking-widest" style={{ color: cfg.accent, opacity: 0.6 }}>
-                    45 MIN · {EXERCISES_PER_SESSION} EXERCISES
-                  </span>
-                </Button>
+                    {/* Animated top accent line */}
+                    <motion.span
+                      className="absolute top-0 left-0 right-0 h-[2px] origin-left"
+                      style={{ background: cfg.accent, boxShadow: `0 0 8px ${cfg.accent}80` }}
+                      initial={{ scaleX: 0 }}
+                      animate={{ scaleX: 1 }}
+                      transition={{ duration: 0.7, delay: 0.2, ease: [0.43, 0.13, 0.23, 0.96] }}
+                    />
+                    <span
+                      className="font-display tracking-[0.2em] leading-none"
+                      style={{ fontSize: "clamp(2rem, 6vw, 3rem)", color: cfg.accent }}
+                    >
+                      {cfg.label}
+                    </span>
+                    <span className="text-[10px] tracking-[0.25em] text-muted-foreground">
+                      {cfg.subtitle}
+                    </span>
+                    <span className="text-[10px] tracking-widest" style={{ color: cfg.accent, opacity: 0.6 }}>
+                      45 MIN · {EXERCISES_PER_SESSION} EXERCISES
+                    </span>
+                  </Button>
+                </motion.div>
               );
             })}
-          </div>
+          </motion.div>
         </div>
       </div>
     );
@@ -608,7 +633,7 @@ export default function LogWorkoutForm({
           type="button"
           onClick={handleSave}
           disabled={isPending}
-          className="flex-1 font-display tracking-[0.2em] uppercase"
+          className="flex-1 font-display tracking-[0.2em] uppercase btn-shine"
           style={{ fontSize: "1rem" }}
         >
           {isPending ? "SAVING…" : "SAVE WORKOUT"}

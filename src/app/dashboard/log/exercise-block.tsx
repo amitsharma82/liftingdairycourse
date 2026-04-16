@@ -1,5 +1,6 @@
 "use client";
 
+import { motion }               from "motion/react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge }     from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -324,15 +325,32 @@ export default function ExerciseBlock({
           </>
         )}
 
-        {sets.map((set, i) => (
-          <SetRow
-            key={i}
-            set={set}
-            index={i}
-            onChange={(field, value) => updateSet(i, field, value)}
-            onRemove={() => removeSet(i)}
-          />
-        ))}
+        {/* ── Staggered set rows (magic 21 pattern) ──────────────────── */}
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden:  {},
+            visible: { transition: { staggerChildren: 0.06, delayChildren: 0.05 } },
+          }}
+        >
+          {sets.map((set, i) => (
+            <motion.div
+              key={i}
+              variants={{
+                hidden:  { opacity: 0, x: -10 },
+                visible: { opacity: 1, x: 0, transition: { type: "spring", stiffness: 130, damping: 16 } },
+              }}
+            >
+              <SetRow
+                set={set}
+                index={i}
+                onChange={(field, value) => updateSet(i, field, value)}
+                onRemove={() => removeSet(i)}
+              />
+            </motion.div>
+          ))}
+        </motion.div>
 
         {sets.length === 0 && (
           <p className="text-muted-foreground text-xs tracking-widest uppercase py-1">

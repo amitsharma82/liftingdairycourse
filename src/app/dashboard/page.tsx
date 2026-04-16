@@ -76,7 +76,7 @@ export default async function DashboardPage({
             <Link
               href={`/dashboard/log?date=${date}`}
               className={buttonVariants({ variant: "default" }) +
-                " tracking-[0.2em] uppercase font-display"}
+                " tracking-[0.2em] uppercase font-display btn-shine"}
             >
               + LOG WORKOUT
             </Link>
