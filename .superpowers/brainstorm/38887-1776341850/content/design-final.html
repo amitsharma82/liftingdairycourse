@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lifting Diary — Final Design</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0a0a12; color: #fff; font-family: monospace; padding: 32px 24px; max-width: 1100px; margin: 0 auto; }
+  .section-label { font-size: 10px; letter-spacing: 0.4em; color: rgba(255,255,255,0.3); margin-bottom: 10px; }
+  .page-title { font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 16px; border-left: 3px solid #a3e635; padding-left: 12px; letter-spacing: 0.1em; }
+  .page-divider { height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); margin: 52px 0; }
+
+  .screen { border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; overflow: hidden; margin-bottom: 32px; background: #07070f; box-shadow: 0 0 60px rgba(163,230,53,0.04), 0 24px 64px rgba(0,0,0,0.6); }
+  .screen-bar { background: rgba(255,255,255,0.04); border-bottom: 1px solid rgba(255,255,255,0.06); padding: 10px 16px; display: flex; align-items: center; gap: 6px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  /* ── Logo C SVG inline component ── */
+  .logo-mark { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .logo-wordmark { font-size: 13px; font-weight: 700; letter-spacing: 0.22em; color: #fff; line-height: 1; }
+  .logo-wordmark span { color: #a3e635; }
+
+  /* ── NAV ── */
+  .nav { display: flex; justify-content: space-between; align-items: center; padding: 13px 32px; border-bottom: 1px solid rgba(255,255,255,0.06); background: rgba(7,7,15,0.97); backdrop-filter: blur(12px); }
+  .nav-links { display: flex; gap: 14px; align-items: center; }
+  .nav-link { color: rgba(255,255,255,0.45); font-size: 10px; letter-spacing: 0.2em; }
+  .nav-cta { background: linear-gradient(135deg,#a3e635,#22d3ee); color: #000; padding: 7px 16px; border-radius: 20px; font-size: 10px; font-weight: 700; letter-spacing: 0.15em; }
+  .color-bar { height: 2px; background: linear-gradient(90deg,#a3e635,#22d3ee,#fb923c); }
+
+  /* ── HERO ── */
+  .hero { padding: 56px 32px 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: center; position: relative; overflow: hidden; min-height: 380px; }
+  .hero::before { content:''; position:absolute; inset:0; background: radial-gradient(ellipse 70% 80% at 25% 60%,rgba(163,230,53,0.09) 0%,transparent 60%), radial-gradient(ellipse 50% 60% at 80% 30%,rgba(34,211,238,0.06) 0%,transparent 55%); }
+  .hero-text { position: relative; z-index: 1; }
+  .hero-eyebrow { color: rgba(255,255,255,0.3); font-size: 9px; letter-spacing: 0.5em; margin-bottom: 14px; }
+  .hero-headline { font-size: 60px; font-weight: 900; line-height: 0.88; letter-spacing: -1px; color: #fff; font-family: Georgia, serif; margin-bottom: 16px; }
+  .hero-headline span { color: #a3e635; text-shadow: 0 0 40px rgba(163,230,53,0.4); }
+  .hero-sub { color: rgba(255,255,255,0.38); font-size: 9px; letter-spacing: 0.28em; margin-bottom: 26px; }
+  .hero-btns { display: flex; gap: 10px; }
+  .btn-primary { background: linear-gradient(135deg,#a3e635,#7ec016); color: #000; padding: 11px 22px; border-radius: 28px; font-size: 10px; font-weight: 700; letter-spacing: 0.2em; box-shadow: 0 0 28px rgba(163,230,53,0.5),0 0 56px rgba(163,230,53,0.18); }
+  .btn-ghost { border: 1px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.65); padding: 11px 22px; border-radius: 28px; font-size: 10px; letter-spacing: 0.2em; background: rgba(255,255,255,0.04); }
+
+  /* Hero right */
+  .hero-right { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; }
+  .barbell-glow { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(ellipse 80% 60% at 50% 55%,rgba(163,230,53,0.13) 0%,rgba(34,211,238,0.07) 45%,transparent 70%); pointer-events: none; }
+  .floating-card { background: rgba(7,7,15,0.78); border: 1px solid rgba(163,230,53,0.22); border-radius: 14px; padding: 12px 18px; backdrop-filter: blur(16px); box-shadow: 0 0 28px rgba(163,230,53,0.09),inset 0 1px 0 rgba(255,255,255,0.07); margin: -6px 20px 0; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .fc-item { text-align: center; }
+  .fc-val { font-size: 17px; font-weight: 700; }
+  .fc-lbl { font-size: 7px; letter-spacing: 0.25em; color: rgba(255,255,255,0.28); margin-top: 2px; }
+  .fc-div { width: 1px; height: 30px; background: rgba(255,255,255,0.07); }
+
+  /* Ticker */
+  .ticker { padding: 13px 0; background: rgba(255,255,255,0.018); border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); overflow: hidden; white-space: nowrap; }
+  .ticker-track { display: inline-block; animation: tick 22s linear infinite; }
+  @keyframes tick { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+  .ti { display: inline-block; font-size: 10px; letter-spacing: 0.3em; padding: 0 22px; opacity: 0.5; }
+
+  /* Features */
+  .features { padding: 48px 32px; }
+  .feat-eye { color: rgba(255,255,255,0.28); font-size: 9px; letter-spacing: 0.4em; margin-bottom: 6px; }
+  .feat-h { font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 26px; font-family: Georgia, serif; }
+  .feat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+  .feat-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 20px; position: relative; overflow: hidden; }
+  .feat-card::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,var(--a),transparent); }
+  .feat-card::after { content:''; position:absolute; top:-36px; left:50%; transform:translateX(-50%); width:70px; height:70px; border-radius:50%; background:var(--a); opacity:0.05; filter:blur(18px); }
+  .feat-num { font-size: 9px; letter-spacing: 0.3em; margin-bottom: 10px; }
+  .feat-name { font-size: 10px; font-weight: 700; letter-spacing: 0.2em; color: #fff; margin-bottom: 7px; }
+  .feat-desc { font-size: 9px; line-height: 1.65; color: rgba(255,255,255,0.38); }
+
+  /* Preview section */
+  .preview { padding: 48px 32px; border-top: 1px solid rgba(255,255,255,0.05); position: relative; overflow: hidden; }
+  .preview::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 80% 55% at 50% 50%,rgba(34,211,238,0.05) 0%,transparent 70%); }
+  .prev-eye { font-size: 9px; letter-spacing: 0.4em; color: rgba(34,211,238,0.65); margin-bottom: 6px; }
+  .prev-h { font-size: 24px; font-weight: 800; color: #fff; margin-bottom: 24px; font-family: Georgia, serif; }
+  .prev-h span { color: #22d3ee; }
+  .prev-card { background: rgba(34,211,238,0.04); border: 1px solid rgba(34,211,238,0.16); border-radius: 18px; padding: 22px; backdrop-filter: blur(12px); box-shadow: 0 0 50px rgba(34,211,238,0.06),inset 0 1px 0 rgba(255,255,255,0.05); position: relative; z-index: 1; }
+  .pc-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+  .pc-title { font-size: 18px; font-weight: 900; color: #22d3ee; letter-spacing: 0.1em; text-shadow: 0 0 20px rgba(34,211,238,0.45); }
+  .pc-sub { color: rgba(255,255,255,0.28); font-size: 8px; letter-spacing: 0.3em; margin-top: 3px; }
+  .pc-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 16px; }
+  .pc-stat { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 10px; }
+  .pc-val { font-size: 16px; font-weight: 700; }
+  .pc-lbl { color: rgba(255,255,255,0.28); font-size: 7px; letter-spacing: 0.2em; margin-top: 3px; }
+  .pc-row { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; }
+  .pc-wname { font-size: 10px; font-weight: 700; color: #fff; letter-spacing: 0.12em; }
+  .pc-wmeta { font-size: 7px; color: rgba(255,255,255,0.3); letter-spacing: 0.15em; margin-top: 2px; }
+  .pc-wvol { font-size: 12px; font-weight: 700; color: #a3e635; }
+
+  /* CTA */
+  .cta { padding: 48px 32px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; position: relative; overflow: hidden; }
+  .cta::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 60% 80% at 50% 110%,rgba(163,230,53,0.07) 0%,transparent 65%); }
+  .cta-text { position: relative; z-index: 1; }
+  .cta-eye { color: rgba(255,255,255,0.28); font-size: 9px; letter-spacing: 0.4em; margin-bottom: 7px; }
+  .cta-h { font-size: 36px; font-weight: 900; color: #fff; font-family: Georgia, serif; line-height: 1; }
+  .cta-h span { color: #a3e635; }
+  .cta-btn { position: relative; z-index: 1; background: linear-gradient(135deg,#a3e635,#7ec016); color: #000; padding: 16px 32px; border-radius: 36px; font-size: 11px; font-weight: 700; letter-spacing: 0.2em; box-shadow: 0 0 36px rgba(163,230,53,0.5),0 0 72px rgba(163,230,53,0.22); white-space: nowrap; }
+
+  /* ── DASHBOARD ── */
+  .dash { padding: 28px 32px; }
+  .dash-eye { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+  .dash-dot { width: 6px; height: 6px; background: #a3e635; border-radius: 50%; box-shadow: 0 0 9px #a3e635; }
+  .dash-eye-txt { color: rgba(255,255,255,0.38); font-size: 9px; letter-spacing: 0.4em; }
+  .dash-h1 { font-size: 44px; font-weight: 900; color: #a3e635; letter-spacing: 0.1em; line-height: 1; text-shadow: 0 0 36px rgba(163,230,53,0.28); margin-bottom: 5px; }
+  .dash-sub { color: rgba(255,255,255,0.28); font-size: 8px; letter-spacing: 0.3em; margin-bottom: 20px; }
+  .stat-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 18px; }
+  .stat-c { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 13px; padding: 14px 18px; position: relative; overflow: hidden; }
+  .stat-c::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--a); box-shadow:0 0 10px var(--a); }
+  .stat-v { font-size: 24px; font-weight: 700; }
+  .stat-l { color: rgba(255,255,255,0.28); font-size: 7px; letter-spacing: 0.25em; margin-top: 3px; }
+  .date-row { display: flex; align-items: center; gap: 9px; margin-bottom: 18px; }
+  .d-btn { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.09); border-radius: 8px; padding: 7px 10px; color: rgba(255,255,255,0.5); font-size: 11px; }
+  .d-disp { background: rgba(255,255,255,0.03); border: 1px solid rgba(163,230,53,0.2); border-radius: 9px; padding: 7px 14px; display: flex; align-items: center; gap: 9px; flex: 1; max-width: 240px; }
+  .d-dot { width: 5px; height: 5px; background: #a3e635; border-radius: 50%; box-shadow: 0 0 7px #a3e635; }
+  .d-wd { color: #a3e635; font-size: 10px; font-weight: 700; letter-spacing: 0.15em; }
+  .d-full { color: rgba(255,255,255,0.28); font-size: 7px; letter-spacing: 0.18em; }
+  .d-log { background: linear-gradient(135deg,#a3e635,#7ec016); color: #000; padding: 8px 18px; border-radius: 9px; font-size: 9px; font-weight: 700; letter-spacing: 0.2em; box-shadow: 0 0 18px rgba(163,230,53,0.38); }
+  .w-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; overflow: hidden; }
+  .wc-top { padding: 16px 20px; display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid rgba(255,255,255,0.04); background: rgba(255,255,255,0.02); }
+  .wc-title { font-size: 14px; font-weight: 700; color: #fff; letter-spacing: 0.1em; }
+  .wc-meta { color: rgba(255,255,255,0.28); font-size: 8px; letter-spacing: 0.18em; margin-top: 3px; }
+  .wc-dur { font-size: 20px; font-weight: 700; color: #a3e635; text-shadow: 0 0 18px rgba(163,230,53,0.38); }
+  .wc-vol { color: #22d3ee; font-size: 8px; letter-spacing: 0.15em; margin-top: 2px; }
+  .wc-body { padding: 12px 20px; }
+  .ex { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+  .ex:last-child { border-bottom: none; }
+  .ex-n { color: rgba(34,211,238,0.45); font-size: 8px; width: 22px; }
+  .ex-name { color: rgba(255,255,255,0.78); font-size: 9px; letter-spacing: 0.07em; flex: 1; }
+  .ex-badge { padding: 2px 7px; border-radius: 20px; font-size: 7px; letter-spacing: 0.1em; border: 1px solid; }
+  .ex-sets { font-size: 9px; color: rgba(255,255,255,0.45); min-width: 40px; text-align: right; }
+  .ex-kg { font-size: 9px; font-weight: 700; color: #a3e635; min-width: 44px; text-align: right; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════
+     LANDING PAGE
+══════════════════════════════════ -->
+<div class="section-label">PAGE 01 · FINAL</div>
+<div class="page-title">LANDING PAGE — with Logo C</div>
+
+<div class="screen">
+  <div class="screen-bar">
+    <div class="dot" style="background:#ff5f57"></div>
+    <div class="dot" style="background:#ffbd2e"></div>
+    <div class="dot" style="background:#28c840"></div>
+    <div style="flex:1;text-align:center;font-size:10px;color:rgba(255,255,255,0.18);">liftingdiary.app</div>
+  </div>
+
+  <!-- NAV with Logo C -->
+  <div class="nav">
+    <div class="logo-mark">
+      <!-- Logo C: barbell through LD -->
+      <svg width="44" height="28" viewBox="0 0 160 104" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="barG" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#555"/>
+            <stop offset="35%" stop-color="#ccc"/>
+            <stop offset="65%" stop-color="#ccc"/>
+            <stop offset="100%" stop-color="#444"/>
+          </linearGradient>
+          <filter id="pg" x="-50%" y="-25%" width="200%" height="150%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <!-- L -->
+        <rect x="16" y="10" width="13" height="68" rx="2" fill="#fff"/>
+        <rect x="16" y="64" width="42" height="14" rx="2" fill="#fff"/>
+        <!-- D -->
+        <rect x="90" y="10" width="13" height="70" rx="2" fill="#fff"/>
+        <path d="M103 10 Q147 10 147 52 Q147 94 103 94 L103 80 Q131 80 131 52 Q131 24 103 24 Z" fill="#fff"/>
+        <!-- Bar cuts through -->
+        <rect x="0" y="44" width="160" height="16" rx="3" fill="url(#barG)" opacity="0.92"/>
+        <!-- Left plate -->
+        <rect x="0" y="29" width="13" height="46" rx="2" fill="#a3e635" filter="url(#pg)"/>
+        <!-- Right plate -->
+        <rect x="147" y="29" width="13" height="46" rx="2" fill="#a3e635" filter="url(#pg)"/>
+      </svg>
+      <div class="logo-wordmark">LIFTING <span>DIARY</span></div>
+    </div>
+    <div class="nav-links">
+      <span class="nav-link">FEATURES</span>
+      <span class="nav-link">HOW IT WORKS</span>
+      <div class="nav-cta">START FREE →</div>
+    </div>
+  </div>
+  <div class="color-bar"></div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-text">
+      <div class="hero-eyebrow">YOUR TRAINING COMPANION</div>
+      <div class="hero-headline">LIFTING<br><span>DIARY.</span></div>
+      <div class="hero-sub">LOG WORKOUTS · FOLLOW PROGRAMS · HIT PRS</div>
+      <div class="hero-btns">
+        <div class="btn-primary">START FREE →</div>
+        <div class="btn-ghost">SIGN IN</div>
+      </div>
+    </div>
+
+    <!-- Barbell + floating card -->
+    <div class="hero-right">
+      <div style="width:100%;position:relative;">
+        <div class="barbell-glow"></div>
+        <svg viewBox="0 0 580 150" fill="none" style="width:100%;position:relative;z-index:1;filter:drop-shadow(0 0 16px rgba(163,230,53,0.22)) drop-shadow(0 0 5px rgba(34,211,238,0.12))">
+          <defs>
+            <linearGradient id="bar2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3a3a3a"/><stop offset="20%" stop-color="#aaa"/><stop offset="50%" stop-color="#e0e0e0"/><stop offset="80%" stop-color="#aaa"/><stop offset="100%" stop-color="#2a2a2a"/></linearGradient>
+            <linearGradient id="col2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4a4a4a"/><stop offset="50%" stop-color="#999"/><stop offset="100%" stop-color="#303030"/></linearGradient>
+            <filter id="fl2"><feGaussianBlur in="SourceGraphic" stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <filter id="fc2"><feGaussianBlur in="SourceGraphic" stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <filter id="fo2"><feGaussianBlur in="SourceGraphic" stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+          <line x1="0" y1="75" x2="26" y2="75" stroke="#a3e635" stroke-width="1.5" stroke-dasharray="7 6" opacity="0.55"/>
+          <line x1="0" y1="66" x2="22" y2="66" stroke="#a3e635" stroke-width="0.8" stroke-dasharray="5 9" opacity="0.4"/>
+          <line x1="0" y1="84" x2="22" y2="84" stroke="#a3e635" stroke-width="0.8" stroke-dasharray="5 9" opacity="0.4"/>
+          <line x1="0" y1="58" x2="18" y2="58" stroke="#22d3ee" stroke-width="0.6" stroke-dasharray="4 12" opacity="0.35"/>
+          <line x1="0" y1="92" x2="18" y2="92" stroke="#22d3ee" stroke-width="0.6" stroke-dasharray="4 12" opacity="0.35"/>
+          <rect x="28" y="48" width="19" height="54" rx="2" fill="#fb923c" filter="url(#fo2)"/>
+          <rect x="28" y="48" width="2.5" height="54" fill="rgba(255,255,255,0.22)" rx="2"/>
+          <rect x="47" y="33" width="27" height="84" rx="2" fill="#22d3ee" filter="url(#fc2)"/>
+          <rect x="47" y="33" width="2.5" height="84" fill="rgba(255,255,255,0.2)" rx="2"/>
+          <rect x="74" y="13" width="40" height="124" rx="2" fill="#a3e635" filter="url(#fl2)"/>
+          <rect x="74" y="13" width="3" height="124" fill="rgba(255,255,255,0.18)" rx="2"/>
+          <text x="94" y="70" text-anchor="middle" fill="rgba(0,0,0,0.5)" font-size="9" font-weight="bold" font-family="monospace">45</text>
+          <text x="94" y="81" text-anchor="middle" fill="rgba(0,0,0,0.35)" font-size="7" font-family="monospace">KG</text>
+          <rect x="114" y="56" width="19" height="38" rx="2" fill="url(#col2)"/>
+          <rect x="133" y="67" width="314" height="16" rx="3" fill="url(#bar2)"/>
+          <line x1="163" y1="68" x2="163" y2="82" stroke="rgba(0,0,0,0.22)" stroke-width="1.5"/>
+          <line x1="171" y1="68" x2="171" y2="82" stroke="rgba(0,0,0,0.22)" stroke-width="1.5"/>
+          <line x1="179" y1="68" x2="179" y2="82" stroke="rgba(0,0,0,0.22)" stroke-width="1.5"/>
+          <line x1="286" y1="67" x2="286" y2="83" stroke="rgba(255,255,255,0.4)" stroke-width="2.5"/>
+          <line x1="294" y1="67" x2="294" y2="83" stroke="rgba(255,255,255,0.4)" stroke-width="2.5"/>
+          <line x1="393" y1="68" x2="393" y2="82" stroke="rgba(0,0,0,0.22)" stroke-width="1.5"/>
+          <line x1="401" y1="68" x2="401" y2="82" stroke="rgba(0,0,0,0.22)" stroke-width="1.5"/>
+          <line x1="409" y1="68" x2="409" y2="82" stroke="rgba(0,0,0,0.22)" stroke-width="1.5"/>
+          <rect x="447" y="56" width="19" height="38" rx="2" fill="url(#col2)"/>
+          <rect x="466" y="13" width="40" height="124" rx="2" fill="#a3e635" filter="url(#fl2)"/>
+          <rect x="466" y="13" width="3" height="124" fill="rgba(255,255,255,0.18)" rx="2"/>
+          <text x="486" y="70" text-anchor="middle" fill="rgba(0,0,0,0.5)" font-size="9" font-weight="bold" font-family="monospace">45</text>
+          <text x="486" y="81" text-anchor="middle" fill="rgba(0,0,0,0.35)" font-size="7" font-family="monospace">KG</text>
+          <rect x="506" y="33" width="27" height="84" rx="2" fill="#22d3ee" filter="url(#fc2)"/>
+          <rect x="506" y="33" width="2.5" height="84" fill="rgba(255,255,255,0.2)" rx="2"/>
+          <rect x="533" y="48" width="19" height="54" rx="2" fill="#fb923c" filter="url(#fo2)"/>
+          <rect x="533" y="48" width="2.5" height="54" fill="rgba(255,255,255,0.22)" rx="2"/>
+          <line x1="554" y1="75" x2="580" y2="75" stroke="#a3e635" stroke-width="1.5" stroke-dasharray="7 6" opacity="0.55"/>
+          <line x1="558" y1="66" x2="580" y2="66" stroke="#a3e635" stroke-width="0.8" stroke-dasharray="5 9" opacity="0.4"/>
+          <line x1="558" y1="84" x2="580" y2="84" stroke="#a3e635" stroke-width="0.8" stroke-dasharray="5 9" opacity="0.4"/>
+          <line x1="562" y1="58" x2="580" y2="58" stroke="#22d3ee" stroke-width="0.6" stroke-dasharray="4 12" opacity="0.35"/>
+          <line x1="562" y1="92" x2="580" y2="92" stroke="#22d3ee" stroke-width="0.6" stroke-dasharray="4 12" opacity="0.35"/>
+        </svg>
+      </div>
+      <div class="floating-card">
+        <div class="fc-item"><div class="fc-val" style="color:#a3e635">58<span style="font-size:10px;opacity:0.55">m</span></div><div class="fc-lbl">DURATION</div></div>
+        <div class="fc-div"></div>
+        <div class="fc-item"><div class="fc-val" style="color:#22d3ee">15</div><div class="fc-lbl">SETS</div></div>
+        <div class="fc-div"></div>
+        <div class="fc-item"><div class="fc-val" style="color:#fb923c">4.2<span style="font-size:10px;opacity:0.55">t</span></div><div class="fc-lbl">VOLUME</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TICKER -->
+  <div class="ticker">
+    <div class="ticker-track">
+      <span class="ti" style="color:#a3e635">THE BAR NEVER LIES</span><span class="ti" style="color:rgba(255,255,255,0.18)">⟡</span>
+      <span class="ti" style="color:#22d3ee">ONE MORE REP</span><span class="ti" style="color:rgba(255,255,255,0.18)">⟡</span>
+      <span class="ti" style="color:#fb923c">PROGRESSIVE OVERLOAD IS THE ONLY LAW</span><span class="ti" style="color:rgba(255,255,255,0.18)">⟡</span>
+      <span class="ti" style="color:#a3e635">DISCIPLINE OVER MOTIVATION</span><span class="ti" style="color:rgba(255,255,255,0.18)">⟡</span>
+      <span class="ti" style="color:#22d3ee">THE BAR NEVER LIES</span><span class="ti" style="color:rgba(255,255,255,0.18)">⟡</span>
+      <span class="ti" style="color:#fb923c">ONE MORE REP</span><span class="ti" style="color:rgba(255,255,255,0.18)">⟡</span>
+      <span class="ti" style="color:#a3e635">PROGRESSIVE OVERLOAD IS THE ONLY LAW</span><span class="ti" style="color:rgba(255,255,255,0.18)">⟡</span>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <div class="features">
+    <div class="feat-eye">WHAT YOU GET</div>
+    <div class="feat-h">Everything you need to train <em>smarter.</em></div>
+    <div class="feat-grid">
+      <div class="feat-card" style="--a:#a3e635"><div class="feat-num" style="color:#a3e635">001</div><div class="feat-name" style="color:#a3e635">LOG SESSIONS</div><div class="feat-desc">Every rep. Every set. Every PR. Track weight, reps, RPE, and rest time with surgical precision.</div></div>
+      <div class="feat-card" style="--a:#22d3ee"><div class="feat-num" style="color:#22d3ee">002</div><div class="feat-name" style="color:#22d3ee">BUILD PROGRAMS</div><div class="feat-desc">Design multi-week training blocks. Schedule sessions by week and day. Never miss a lift.</div></div>
+      <div class="feat-card" style="--a:#fb923c"><div class="feat-num" style="color:#fb923c">003</div><div class="feat-name" style="color:#fb923c">TRACK PROGRESS</div><div class="feat-desc">Your numbers. Your history. Watch the trend line move as you consistently put in the work.</div></div>
+    </div>
+  </div>
+
+  <!-- APP PREVIEW -->
+  <div class="preview">
+    <div class="prev-eye">SEE IT IN ACTION</div>
+    <div class="prev-h">Your diary. Built for <span>athletes.</span></div>
+    <div class="prev-card">
+      <div class="pc-head">
+        <div><div class="pc-title">DAILY LOG</div><div class="pc-sub">WEDNESDAY · APR 16, 2026</div></div>
+        <div style="background:rgba(163,230,53,0.1);border:1px solid rgba(163,230,53,0.22);border-radius:7px;padding:6px 12px;font-size:9px;color:#a3e635;letter-spacing:0.15em;">+ LOG WORKOUT</div>
+      </div>
+      <div class="pc-stats">
+        <div class="pc-stat"><div class="pc-val" style="color:#a3e635">4.2t</div><div class="pc-lbl">VOLUME TODAY</div></div>
+        <div class="pc-stat"><div class="pc-val" style="color:#22d3ee">15</div><div class="pc-lbl">SETS TODAY</div></div>
+        <div class="pc-stat"><div class="pc-val" style="color:#fb923c">12</div><div class="pc-lbl">DAY STREAK</div></div>
+      </div>
+      <div class="pc-row">
+        <div><div class="pc-wname">PUSH DAY A</div><div class="pc-wmeta">4 EXERCISES · 15 SETS · 58 MIN</div></div>
+        <div class="pc-wvol">4,200 KG</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta">
+    <div class="cta-text">
+      <div class="cta-eye">READY TO START?</div>
+      <div class="cta-h">Load the <span>bar.</span></div>
+    </div>
+    <div class="cta-btn">CREATE FREE ACCOUNT →</div>
+  </div>
+</div>
+
+<div class="page-divider"></div>
+
+<!-- ══════════════════════════════════
+     DASHBOARD
+══════════════════════════════════ -->
+<div class="section-label">PAGE 02 · FINAL</div>
+<div class="page-title">DASHBOARD — with Logo C in nav</div>
+
+<div class="screen">
+  <div class="screen-bar">
+    <div class="dot" style="background:#ff5f57"></div>
+    <div class="dot" style="background:#ffbd2e"></div>
+    <div class="dot" style="background:#28c840"></div>
+    <div style="flex:1;text-align:center;font-size:10px;color:rgba(255,255,255,0.18);">liftingdiary.app/dashboard</div>
+  </div>
+
+  <div class="nav">
+    <div class="logo-mark">
+      <svg width="44" height="28" viewBox="0 0 160 104" fill="none">
+        <defs>
+          <linearGradient id="barG2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#555"/><stop offset="35%" stop-color="#ccc"/><stop offset="65%" stop-color="#ccc"/><stop offset="100%" stop-color="#444"/></linearGradient>
+          <filter id="pg2"><feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <rect x="16" y="10" width="13" height="68" rx="2" fill="#fff"/>
+        <rect x="16" y="64" width="42" height="14" rx="2" fill="#fff"/>
+        <rect x="90" y="10" width="13" height="70" rx="2" fill="#fff"/>
+        <path d="M103 10 Q147 10 147 52 Q147 94 103 94 L103 80 Q131 80 131 52 Q131 24 103 24 Z" fill="#fff"/>
+        <rect x="0" y="44" width="160" height="16" rx="3" fill="url(#barG2)" opacity="0.92"/>
+        <rect x="0" y="29" width="13" height="46" rx="2" fill="#a3e635" filter="url(#pg2)"/>
+        <rect x="147" y="29" width="13" height="46" rx="2" fill="#a3e635" filter="url(#pg2)"/>
+      </svg>
+      <div class="logo-wordmark">LIFTING <span>DIARY</span></div>
+    </div>
+    <div class="nav-links">
+      <span class="nav-link">DASHBOARD</span>
+      <div style="width:30px;height:30px;background:rgba(163,230,53,0.1);border:1px solid rgba(163,230,53,0.22);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;">👤</div>
+    </div>
+  </div>
+  <div class="color-bar"></div>
+
+  <div class="dash">
+    <div class="dash-eye"><div class="dash-dot"></div><div class="dash-eye-txt">Training Journal</div></div>
+    <div class="dash-h1">DAILY LOG</div>
+    <div class="dash-sub">Every rep recorded. Every session counts.</div>
+
+    <div class="stat-row">
+      <div class="stat-c" style="--a:#a3e635"><div class="stat-v" style="color:#a3e635">4,200 <span style="font-size:12px;opacity:0.55">KG</span></div><div class="stat-l">VOLUME TODAY</div></div>
+      <div class="stat-c" style="--a:#22d3ee"><div class="stat-v" style="color:#22d3ee">15</div><div class="stat-l">SETS TODAY</div></div>
+      <div class="stat-c" style="--a:#fb923c"><div class="stat-v" style="color:#fb923c">12 🔥</div><div class="stat-l">DAY STREAK</div></div>
+    </div>
+
+    <div class="date-row">
+      <div class="d-btn">‹</div>
+      <div class="d-disp"><div class="d-dot"></div><div><div class="d-wd">WEDNESDAY</div><div class="d-full">April 16, 2026</div></div></div>
+      <div class="d-btn">›</div>
+      <div class="d-log">+ LOG WORKOUT</div>
+    </div>
+
+    <div class="w-card">
+      <div class="wc-top">
+        <div><div class="wc-title">PUSH DAY A</div><div class="wc-meta">4 EXERCISES · 15 SETS</div></div>
+        <div style="text-align:right"><div class="wc-dur">58m</div><div class="wc-vol">4,200 KG VOL</div></div>
+      </div>
+      <div class="wc-body">
+        <div class="ex"><div class="ex-n">01</div><div class="ex-name">SQUAT</div><div class="ex-badge" style="color:#a3e635;border-color:rgba(163,230,53,0.28)">LEGS</div><div class="ex-sets">5×5</div><div class="ex-kg">100 KG</div></div>
+        <div class="ex"><div class="ex-n">02</div><div class="ex-name">BENCH PRESS</div><div class="ex-badge" style="color:#22d3ee;border-color:rgba(34,211,238,0.28)">CHEST</div><div class="ex-sets">4×8</div><div class="ex-kg">80 KG</div></div>
+        <div class="ex"><div class="ex-n">03</div><div class="ex-name">OVERHEAD PRESS</div><div class="ex-badge" style="color:#fb923c;border-color:rgba(251,146,60,0.28)">SHOULDERS</div><div class="ex-sets">3×10</div><div class="ex-kg">55 KG</div></div>
+        <div class="ex"><div class="ex-n">04</div><div class="ex-name">DEADLIFT</div><div class="ex-badge" style="color:#a3e635;border-color:rgba(163,230,53,0.28)">BACK</div><div class="ex-sets">3×5</div><div class="ex-kg">120 KG</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

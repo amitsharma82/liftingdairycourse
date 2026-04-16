@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Logo Concepts</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #07070f; color: #fff; font-family: monospace; padding: 40px 32px; max-width: 1000px; margin: 0 auto; }
+  h2 { font-size: 14px; letter-spacing: 0.4em; color: rgba(255,255,255,0.4); margin-bottom: 6px; text-transform: uppercase; }
+  p { font-size: 11px; color: rgba(255,255,255,0.35); letter-spacing: 0.2em; margin-bottom: 36px; }
+
+  .logo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 48px; }
+
+  .logo-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .logo-card:hover { border-color: rgba(163,230,53,0.35); box-shadow: 0 0 24px rgba(163,230,53,0.07); }
+  .logo-card.selected { border-color: #a3e635; box-shadow: 0 0 32px rgba(163,230,53,0.2); }
+
+  .logo-preview {
+    background: #0a0a12;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 24px; padding: 36px 24px 28px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    min-height: 220px;
+  }
+
+  /* On dark bg */
+  .logo-preview .on-dark { display: flex; align-items: center; gap: 10px; }
+  /* On light bg strip */
+  .logo-preview-light {
+    background: #f0f0f0;
+    display: flex; align-items: center; justify-content: center;
+    gap: 10px;
+    padding: 10px 24px;
+    border-radius: 8px;
+  }
+
+  .logo-meta { padding: 18px 20px; }
+  .logo-letter { font-size: 11px; font-weight: 700; color: #a3e635; letter-spacing: 0.3em; margin-bottom: 5px; }
+  .logo-name { font-size: 13px; color: #fff; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .logo-desc { font-size: 9px; color: rgba(255,255,255,0.4); line-height: 1.6; letter-spacing: 0.1em; }
+
+  /* ── Concept A: Barbell icon mark ── */
+  .icon-barbell { display: flex; align-items: center; }
+  .wordmark { font-family: monospace; font-weight: 700; letter-spacing: 0.2em; }
+
+  /* ── Concept B: Weight plate badge ── */
+  /* SVG inline */
+
+  /* ── Concept C: LD monogram ── */
+</style>
+</head>
+<body>
+
+<h2>Logo Concepts</h2>
+<p>Three directions for the Lifting Diary mark. Click one to select.</p>
+
+<div class="logo-grid">
+
+  <!-- ── A: Minimal barbell icon + wordmark ── -->
+  <div class="logo-card" onclick="select(this,'a')">
+    <div class="logo-preview">
+
+      <!-- Dark bg version -->
+      <div class="on-dark">
+        <!-- Barbell icon mark -->
+        <svg width="44" height="24" viewBox="0 0 88 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Left outer plate -->
+          <rect x="0" y="6" width="10" height="36" rx="2" fill="#a3e635" filter="url(#gA)"/>
+          <!-- Left inner plate -->
+          <rect x="12" y="12" width="7" height="24" rx="1.5" fill="#a3e635" opacity="0.75"/>
+          <!-- Bar -->
+          <rect x="21" y="21" width="46" height="6" rx="2" fill="#888"/>
+          <rect x="21" y="21" width="46" height="2" rx="1" fill="#ccc" opacity="0.5"/>
+          <!-- Right inner plate -->
+          <rect x="69" y="12" width="7" height="24" rx="1.5" fill="#a3e635" opacity="0.75"/>
+          <!-- Right outer plate -->
+          <rect x="78" y="6" width="10" height="36" rx="2" fill="#a3e635" filter="url(#gA)"/>
+          <defs>
+            <filter id="gA" x="-60%" y="-30%" width="220%" height="160%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="b"/>
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+        </svg>
+        <div class="wordmark" style="color:#fff; font-size:16px;">LIFTING<br><span style="color:#a3e635">DIARY</span></div>
+      </div>
+
+      <!-- Compact nav version -->
+      <div class="on-dark" style="transform:scale(0.7);opacity:0.7">
+        <svg width="32" height="18" viewBox="0 0 88 48" fill="none">
+          <rect x="0" y="6" width="10" height="36" rx="2" fill="#a3e635"/>
+          <rect x="12" y="12" width="7" height="24" rx="1.5" fill="#a3e635" opacity="0.7"/>
+          <rect x="21" y="21" width="46" height="6" rx="2" fill="#888"/>
+          <rect x="69" y="12" width="7" height="24" rx="1.5" fill="#a3e635" opacity="0.7"/>
+          <rect x="78" y="6" width="10" height="36" rx="2" fill="#a3e635"/>
+        </svg>
+        <span style="color:#a3e635;font-size:11px;letter-spacing:0.25em;font-weight:700">LIFTING DIARY</span>
+      </div>
+
+      <!-- Light bg preview -->
+      <div class="logo-preview-light">
+        <svg width="28" height="16" viewBox="0 0 88 48" fill="none">
+          <rect x="0" y="6" width="10" height="36" rx="2" fill="#5a9e00"/>
+          <rect x="12" y="12" width="7" height="24" rx="1.5" fill="#5a9e00" opacity="0.7"/>
+          <rect x="21" y="21" width="46" height="6" rx="2" fill="#555"/>
+          <rect x="69" y="12" width="7" height="24" rx="1.5" fill="#5a9e00" opacity="0.7"/>
+          <rect x="78" y="6" width="10" height="36" rx="2" fill="#5a9e00"/>
+        </svg>
+        <span style="color:#111;font-family:monospace;font-size:10px;font-weight:700;letter-spacing:0.2em;">LIFTING DIARY</span>
+      </div>
+    </div>
+    <div class="logo-meta">
+      <div class="logo-letter">A</div>
+      <div class="logo-name">Side-view barbell mark</div>
+      <div class="logo-desc">Classic barbell silhouette as the icon, wordmark to the right. Instantly readable at any size. Clean in nav, bold on landing. Lime plates glow in neon mode.</div>
+    </div>
+  </div>
+
+  <!-- ── B: Circular weight plate badge ── -->
+  <div class="logo-card" onclick="select(this,'b')">
+    <div class="logo-preview">
+
+      <div class="on-dark" style="flex-direction:column;gap:16px;align-items:center;">
+        <!-- Plate badge mark (standalone) -->
+        <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Outer ring -->
+          <circle cx="32" cy="32" r="30" stroke="#a3e635" stroke-width="3" fill="none" filter="url(#gB)"/>
+          <!-- Inner ring -->
+          <circle cx="32" cy="32" r="20" stroke="#a3e635" stroke-width="1.5" fill="none" opacity="0.5"/>
+          <!-- Centre hole -->
+          <circle cx="32" cy="32" r="7" stroke="#a3e635" stroke-width="2" fill="#07070f"/>
+          <!-- LD text inside plate -->
+          <text x="32" y="37" text-anchor="middle" fill="#a3e635" font-size="11" font-weight="900" font-family="monospace" letter-spacing="1">LD</text>
+          <!-- Spoke lines -->
+          <line x1="32" y1="2" x2="32" y2="12" stroke="#a3e635" stroke-width="2" opacity="0.4"/>
+          <line x1="32" y1="52" x2="32" y2="62" stroke="#a3e635" stroke-width="2" opacity="0.4"/>
+          <line x1="2" y1="32" x2="12" y2="32" stroke="#a3e635" stroke-width="2" opacity="0.4"/>
+          <line x1="52" y1="32" x2="62" y2="32" stroke="#a3e635" stroke-width="2" opacity="0.4"/>
+          <defs>
+            <filter id="gB" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="b"/>
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+        </svg>
+
+        <!-- With wordmark -->
+        <div class="on-dark">
+          <svg width="28" height="28" viewBox="0 0 64 64" fill="none">
+            <circle cx="32" cy="32" r="30" stroke="#a3e635" stroke-width="3" fill="none"/>
+            <circle cx="32" cy="32" r="20" stroke="#a3e635" stroke-width="1.5" fill="none" opacity="0.5"/>
+            <circle cx="32" cy="32" r="7" stroke="#a3e635" stroke-width="2" fill="#07070f"/>
+            <text x="32" y="37" text-anchor="middle" fill="#a3e635" font-size="11" font-weight="900" font-family="monospace" letter-spacing="1">LD</text>
+          </svg>
+          <span style="color:#fff;font-family:monospace;font-size:13px;font-weight:700;letter-spacing:0.22em;">LIFTING DIARY</span>
+        </div>
+      </div>
+
+      <!-- Light bg preview -->
+      <div class="logo-preview-light">
+        <svg width="22" height="22" viewBox="0 0 64 64" fill="none">
+          <circle cx="32" cy="32" r="30" stroke="#5a9e00" stroke-width="3" fill="none"/>
+          <circle cx="32" cy="32" r="20" stroke="#5a9e00" stroke-width="1.5" fill="none" opacity="0.5"/>
+          <circle cx="32" cy="32" r="7" stroke="#5a9e00" stroke-width="2" fill="#f0f0f0"/>
+          <text x="32" y="37" text-anchor="middle" fill="#5a9e00" font-size="11" font-weight="900" font-family="monospace" letter-spacing="1">LD</text>
+        </svg>
+        <span style="color:#111;font-family:monospace;font-size:10px;font-weight:700;letter-spacing:0.2em;">LIFTING DIARY</span>
+      </div>
+    </div>
+    <div class="logo-meta">
+      <div class="logo-letter">B</div>
+      <div class="logo-name">Weight plate badge</div>
+      <div class="logo-desc">Top-down view of a weight plate with "LD" initials inside. Doubles as an app icon or favicon. More distinctive and unique — feels like a real brand mark. Glows beautifully in neon.</div>
+    </div>
+  </div>
+
+  <!-- ── C: Barbell-through-letter monogram ── -->
+  <div class="logo-card" onclick="select(this,'c')">
+    <div class="logo-preview">
+
+      <div style="display:flex;flex-direction:column;align-items:center;gap:16px;">
+        <!-- Standalone mark -->
+        <svg width="80" height="52" viewBox="0 0 160 104" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Letter L shape -->
+          <rect x="16" y="10" width="14" height="70" rx="2" fill="#fff"/>
+          <rect x="16" y="66" width="44" height="14" rx="2" fill="#fff"/>
+          <!-- Letter D shape -->
+          <rect x="90" y="10" width="14" height="70" rx="2" fill="#fff"/>
+          <path d="M104 10 Q148 10 148 52 Q148 94 104 94 L104 80 Q132 80 132 52 Q132 24 104 24 Z" fill="#fff"/>
+          <!-- Barbell bar cutting through both letters horizontally -->
+          <rect x="0" y="44" width="160" height="16" rx="3" fill="url(#barC)" opacity="0.95"/>
+          <!-- Left plate -->
+          <rect x="0" y="28" width="12" height="48" rx="2" fill="#a3e635" filter="url(#gC)"/>
+          <!-- Right plate -->
+          <rect x="148" y="28" width="12" height="48" rx="2" fill="#a3e635" filter="url(#gC)"/>
+          <defs>
+            <linearGradient id="barC" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#555"/>
+              <stop offset="40%" stop-color="#ccc"/>
+              <stop offset="60%" stop-color="#ccc"/>
+              <stop offset="100%" stop-color="#444"/>
+            </linearGradient>
+            <filter id="gC" x="-40%" y="-20%" width="180%" height="140%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="b"/>
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+        </svg>
+
+        <!-- With wordmark below -->
+        <div style="display:flex;align-items:center;gap:10px;">
+          <svg width="48" height="32" viewBox="0 0 160 104" fill="none">
+            <rect x="16" y="10" width="14" height="70" rx="2" fill="#fff"/>
+            <rect x="16" y="66" width="44" height="14" rx="2" fill="#fff"/>
+            <rect x="90" y="10" width="14" height="70" rx="2" fill="#fff"/>
+            <path d="M104 10 Q148 10 148 52 Q148 94 104 94 L104 80 Q132 80 132 52 Q132 24 104 24 Z" fill="#fff"/>
+            <rect x="0" y="44" width="160" height="16" rx="3" fill="#aaa" opacity="0.9"/>
+            <rect x="0" y="28" width="12" height="48" rx="2" fill="#a3e635"/>
+            <rect x="148" y="28" width="12" height="48" rx="2" fill="#a3e635"/>
+          </svg>
+          <span style="color:#fff;font-family:monospace;font-size:12px;font-weight:700;letter-spacing:0.2em;">LIFTING DIARY</span>
+        </div>
+      </div>
+
+      <!-- Light bg preview -->
+      <div class="logo-preview-light">
+        <svg width="32" height="20" viewBox="0 0 160 104" fill="none">
+          <rect x="16" y="10" width="14" height="70" rx="2" fill="#222"/>
+          <rect x="16" y="66" width="44" height="14" rx="2" fill="#222"/>
+          <rect x="90" y="10" width="14" height="70" rx="2" fill="#222"/>
+          <path d="M104 10 Q148 10 148 52 Q148 94 104 94 L104 80 Q132 80 132 52 Q132 24 104 24 Z" fill="#222"/>
+          <rect x="0" y="44" width="160" height="16" rx="3" fill="#888" opacity="0.9"/>
+          <rect x="0" y="28" width="12" height="48" rx="2" fill="#5a9e00"/>
+          <rect x="148" y="28" width="12" height="48" rx="2" fill="#5a9e00"/>
+        </svg>
+        <span style="color:#111;font-family:monospace;font-size:10px;font-weight:700;letter-spacing:0.2em;">LIFTING DIARY</span>
+      </div>
+    </div>
+    <div class="logo-meta">
+      <div class="logo-letter">C</div>
+      <div class="logo-name">Barbell through "LD" monogram</div>
+      <div class="logo-desc">A barbell bar cuts through the letters L and D horizontally, with lime plates on each end. Clever and sport-specific — the concept only makes sense for a lifting app. Most unique of the three.</div>
+    </div>
+  </div>
+
+</div>
+
+<div style="padding:16px 20px;background:rgba(163,230,53,0.05);border:1px solid rgba(163,230,53,0.15);border-radius:10px;font-size:9px;color:rgba(255,255,255,0.45);line-height:1.7;letter-spacing:0.1em;">
+  All three will be built as SVG React components and used in the nav header and anywhere else a logo appears. The icon mark (standalone) will also serve as the favicon.
+</div>
+
+<script>
+function select(el, choice) {
+  document.querySelectorAll('.logo-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  // Log selection for state tracking
+  try {
+    fetch('/event', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({type:'click', choice, text: el.querySelector('.logo-name').textContent})
+    });
+  } catch(e) {}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<h2>Which design direction feels right?</h2>
+<p class="subtitle">All three keep your lime/cyan/orange palette, dark background, and animations. Pick the overall vibe.</p>
+
+<div class="cards">
+
+  <!-- Option A -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0a0a0a;padding:0;overflow:hidden;height:260px;position:relative;">
+      <!-- Athletic Editorial mockup -->
+      <div style="position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,0.02) 0px,rgba(255,255,255,0.02) 1px,transparent 1px,transparent 48px),repeating-linear-gradient(90deg,rgba(255,255,255,0.02) 0px,rgba(255,255,255,0.02) 1px,transparent 1px,transparent 48px);"></div>
+      <div style="padding:20px;position:relative;z-index:1;">
+        <!-- Nav -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;border-bottom:1px solid rgba(163,230,53,0.3);padding-bottom:10px;">
+          <span style="color:#a3e635;font-family:monospace;font-size:11px;font-weight:700;letter-spacing:0.3em;">LIFTING DIARY</span>
+          <div style="display:flex;gap:10px;">
+            <span style="color:rgba(255,255,255,0.3);font-family:monospace;font-size:9px;letter-spacing:0.2em;">LOG</span>
+            <span style="color:rgba(255,255,255,0.3);font-family:monospace;font-size:9px;letter-spacing:0.2em;">STATS</span>
+            <div style="background:#a3e635;color:#000;padding:3px 8px;font-family:monospace;font-size:9px;letter-spacing:0.15em;">START FREE</div>
+          </div>
+        </div>
+        <!-- Giant number hero -->
+        <div style="display:flex;align-items:flex-end;gap:12px;margin-bottom:6px;">
+          <span style="font-size:72px;font-weight:900;color:#fff;line-height:0.85;letter-spacing:-2px;font-family:serif;">01</span>
+          <div style="margin-bottom:6px;">
+            <div style="color:#a3e635;font-family:monospace;font-size:8px;letter-spacing:0.3em;margin-bottom:4px;">FEATURED</div>
+            <div style="color:#fff;font-family:monospace;font-size:13px;font-weight:700;letter-spacing:0.15em;">TRACK EVERY<br>LIFT. EVERY DAY.</div>
+          </div>
+        </div>
+        <!-- Color band -->
+        <div style="height:3px;background:linear-gradient(90deg,#a3e635,#22d3ee,#fb923c);margin-bottom:10px;"></div>
+        <!-- Stats row -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:rgba(255,255,255,0.08);">
+          <div style="background:#0a0a0a;padding:8px;text-align:center;">
+            <div style="color:#a3e635;font-family:monospace;font-size:16px;font-weight:700;">10K+</div>
+            <div style="color:rgba(255,255,255,0.3);font-family:monospace;font-size:7px;letter-spacing:0.2em;">SESSIONS</div>
+          </div>
+          <div style="background:#0a0a0a;padding:8px;text-align:center;">
+            <div style="color:#22d3ee;font-family:monospace;font-size:16px;font-weight:700;">200+</div>
+            <div style="color:rgba(255,255,255,0.3);font-family:monospace;font-size:7px;letter-spacing:0.2em;">EXERCISES</div>
+          </div>
+          <div style="background:#0a0a0a;padding:8px;text-align:center;">
+            <div style="color:#fb923c;font-family:monospace;font-size:16px;font-weight:700;">FREE</div>
+            <div style="color:rgba(255,255,255,0.3);font-family:monospace;font-size:7px;letter-spacing:0.2em;">TO START</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Athletic Editorial</h3>
+      <p>Sports-magazine energy. Giant numerals, bold typography, stark grid layouts, color bars between sections. Like Nike Training Club crossed with a print magazine. Very graphic, high contrast, content-first. Animations are purposeful: reveals, counters, section transitions.</p>
+    </div>
+  </div>
+
+  <!-- Option B -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#060610;padding:0;overflow:hidden;height:260px;position:relative;">
+      <!-- Neon Sports App mockup -->
+      <div style="position:absolute;inset:0;background:radial-gradient(ellipse 120% 80% at 50% -20%,rgba(163,230,53,0.12) 0%,rgba(34,211,238,0.06) 40%,transparent 70%);"></div>
+      <div style="padding:20px;position:relative;z-index:1;">
+        <!-- Nav -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div style="width:8px;height:8px;background:#a3e635;border-radius:50%;box-shadow:0 0 8px #a3e635;"></div>
+            <span style="color:#fff;font-family:monospace;font-size:11px;letter-spacing:0.2em;">LIFTING DIARY</span>
+          </div>
+          <div style="background:linear-gradient(135deg,#a3e635,#22d3ee);color:#000;padding:4px 10px;border-radius:20px;font-family:monospace;font-size:9px;font-weight:700;">START FREE →</div>
+        </div>
+        <!-- Hero with glow -->
+        <div style="text-align:center;margin-bottom:14px;">
+          <div style="color:rgba(255,255,255,0.4);font-family:monospace;font-size:8px;letter-spacing:0.4em;margin-bottom:8px;">YOUR TRAINING COMPANION</div>
+          <div style="font-size:32px;font-weight:900;color:#fff;letter-spacing:-1px;line-height:1;font-family:serif;text-shadow:0 0 40px rgba(163,230,53,0.4);">LIFTING<br><span style="color:#a3e635;">DIARY.</span></div>
+        </div>
+        <!-- Glass cards row -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
+          <div style="background:rgba(163,230,53,0.08);border:1px solid rgba(163,230,53,0.25);border-radius:8px;padding:8px;backdrop-filter:blur(8px);">
+            <div style="color:#a3e635;font-family:monospace;font-size:14px;font-weight:700;">LOG</div>
+            <div style="color:rgba(255,255,255,0.4);font-family:monospace;font-size:7px;margin-top:2px;">SESSIONS</div>
+          </div>
+          <div style="background:rgba(34,211,238,0.08);border:1px solid rgba(34,211,238,0.25);border-radius:8px;padding:8px;backdrop-filter:blur(8px);">
+            <div style="color:#22d3ee;font-family:monospace;font-size:14px;font-weight:700;">BUILD</div>
+            <div style="color:rgba(255,255,255,0.4);font-family:monospace;font-size:7px;margin-top:2px;">PROGRAMS</div>
+          </div>
+          <div style="background:rgba(251,146,60,0.08);border:1px solid rgba(251,146,60,0.25);border-radius:8px;padding:8px;backdrop-filter:blur(8px);">
+            <div style="color:#fb923c;font-family:monospace;font-size:14px;font-weight:700;">HIT</div>
+            <div style="color:rgba(255,255,255,0.4);font-family:monospace;font-size:7px;margin-top:2px;">YOUR PRS</div>
+          </div>
+        </div>
+        <!-- Gradient divider -->
+        <div style="height:1px;background:linear-gradient(90deg,transparent,#a3e635,#22d3ee,transparent);margin-top:14px;"></div>
+        <div style="color:rgba(255,255,255,0.2);font-family:monospace;font-size:7px;letter-spacing:0.3em;text-align:center;margin-top:8px;">10K WORKOUTS LOGGED · 200+ EXERCISES</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Neon Glow App</h3>
+      <p>Premium fitness app feel with glassmorphism cards, glowing radial gradients, and soft rounded corners. Like a polished iOS app meets Strava. Metrics glow, backgrounds pulse, everything feels alive and premium. Great for a "wow" first impression on the landing page.</p>
+    </div>
+  </div>
+
+  <!-- Option C -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#080808;padding:0;overflow:hidden;height:260px;position:relative;">
+      <!-- Brutalist Sport mockup -->
+      <div style="padding:16px;position:relative;z-index:1;">
+        <!-- Nav with thick border -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0;border:2px solid rgba(255,255,255,0.15);padding:8px 12px;margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:10px;height:10px;background:#a3e635;"></div>
+            <span style="color:#fff;font-family:monospace;font-size:10px;font-weight:700;letter-spacing:0.25em;">LIFTING DIARY</span>
+          </div>
+          <div style="border:2px solid #a3e635;color:#a3e635;padding:3px 8px;font-family:monospace;font-size:8px;font-weight:700;letter-spacing:0.2em;">START FREE</div>
+        </div>
+        <!-- Thick color block hero -->
+        <div style="border-left:4px solid #a3e635;padding-left:12px;margin-bottom:12px;">
+          <div style="color:rgba(255,255,255,0.35);font-family:monospace;font-size:7px;letter-spacing:0.4em;margin-bottom:4px;">TRAINING TRACKER</div>
+          <div style="font-size:38px;font-weight:900;color:#fff;line-height:0.85;letter-spacing:-1px;font-family:monospace;text-transform:uppercase;">LIFTING<br>DIARY</div>
+          <div style="color:#a3e635;font-family:monospace;font-size:10px;margin-top:6px;letter-spacing:0.2em;">LOG. BUILD. CRUSH.</div>
+        </div>
+        <!-- Feature blocks with thick borders -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;">
+          <div style="border:1px solid rgba(163,230,53,0.4);padding:8px;position:relative;">
+            <div style="position:absolute;top:0;left:0;width:3px;height:100%;background:#a3e635;"></div>
+            <div style="padding-left:8px;">
+              <div style="color:#a3e635;font-family:monospace;font-size:8px;letter-spacing:0.25em;margin-bottom:2px;">001 / LOG</div>
+              <div style="color:rgba(255,255,255,0.6);font-family:monospace;font-size:7px;">Every rep. Every set.</div>
+            </div>
+          </div>
+          <div style="border:1px solid rgba(34,211,238,0.4);padding:8px;position:relative;">
+            <div style="position:absolute;top:0;left:0;width:3px;height:100%;background:#22d3ee;"></div>
+            <div style="padding-left:8px;">
+              <div style="color:#22d3ee;font-family:monospace;font-size:8px;letter-spacing:0.25em;margin-bottom:2px;">002 / BUILD</div>
+              <div style="color:rgba(255,255,255,0.6);font-family:monospace;font-size:7px;">Design programs.</div>
+            </div>
+          </div>
+        </div>
+        <!-- CTA bar -->
+        <div style="background:#a3e635;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-family:monospace;font-size:9px;font-weight:700;color:#000;letter-spacing:0.2em;">START LOGGING TODAY</span>
+          <span style="font-family:monospace;font-size:9px;color:#000;font-weight:700;">→</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Evolved Brutalist</h3>
+      <p>Takes your current aesthetic further — thick borders, color-block accents, bold geometry. Feels raw and athletic, like a performance brand (think Gymshark dark mode or Lululemon race edition). Very "serious athlete" energy. Animations are sharp: wipe-ins, flicker effects, fast cuts.</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:16px;">You can click one to select it, or just describe your preference in the terminal.</p>

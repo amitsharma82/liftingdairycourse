@@ -1,6 +1,8 @@
+import Link           from "next/link";
 import { auth }      from "@clerk/nextjs/server";
 import { redirect }  from "next/navigation";
 import { getWorkoutsByDate, getWorkoutDates } from "@/data/workouts";
+import { buttonVariants } from "@/components/ui/button";
 import DateNav        from "./date-nav";
 import WorkoutFeed    from "./workout-feed";
 
@@ -69,7 +71,16 @@ export default async function DashboardPage({
             Every rep recorded. Every session counts.
           </p>
 
-          <DateNav date={date} workoutDates={workoutDates} />
+          <div className="flex flex-wrap items-center gap-3">
+            <DateNav date={date} workoutDates={workoutDates} />
+            <Link
+              href={`/dashboard/log?date=${date}`}
+              className={buttonVariants({ variant: "default" }) +
+                " tracking-[0.2em] uppercase font-display"}
+            >
+              + LOG WORKOUT
+            </Link>
+          </div>
         </div>
 
         {/* ── Separator ────────────────────────────────────────────────────── */}

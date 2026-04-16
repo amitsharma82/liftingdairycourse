@@ -1,3 +1,6 @@
+import Link                    from "next/link";
+import { motion }              from "motion/react";
+import { Timer, Dumbbell, TrendingUp } from "lucide-react";
 import type { getWorkoutsByDate } from "@/data/workouts";
 import {
   Card,
@@ -7,8 +10,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge }     from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+import { Badge }          from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
+import { Separator }      from "@/components/ui/separator";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -78,6 +82,17 @@ export default function WorkoutFeed({
       {workouts.map((workout, i) => (
         <WorkoutCard key={workout.id} workout={workout} index={i} />
       ))}
+
+      {/* ── Log another session for this day ───────────────────────────── */}
+      <div className="flex justify-center pt-2">
+        <Link
+          href={`/dashboard/log?date=${date}`}
+          className={buttonVariants({ variant: "outline", size: "sm" }) +
+            " tracking-[0.2em] text-xs uppercase text-primary border-primary/30 hover:bg-primary/10 hover:text-primary"}
+        >
+          + LOG ANOTHER SESSION
+        </Link>
+      </div>
     </div>
   );
 }
@@ -136,14 +151,23 @@ function WorkoutCard({ workout, index }: { workout: Workout; index: number }) {
 
   return (
     <Card
-      className="animate-rise-in overflow-hidden"
-      style={{
-        animationDelay: `${index * 100}ms`,
-        borderTop:      "3px solid var(--primary)",
-      }}
+      className="animate-rise-in overflow-hidden relative"
+      style={{ animationDelay: `${index * 100}ms` }}
     >
+      {/* ── Animated top progress bar (magic 21 pattern) ───────────────── */}
+      <motion.div
+        className="absolute top-0 left-0 right-0 h-[3px] origin-left"
+        style={{
+          background: "linear-gradient(90deg, #a3e635, #22d3ee 60%, rgba(251,146,60,0.6))",
+          boxShadow: "0 0 10px rgba(163,230,53,0.6), 0 0 20px rgba(163,230,53,0.25)",
+        }}
+        initial={{ scaleX: 0 }}
+        animate={{ scaleX: 1 }}
+        transition={{ duration: 1.1, delay: index * 0.1, ease: [0.43, 0.13, 0.23, 0.96] }}
+      />
+
       {/* ── Header ─────────────────────────────────────────────────────── */}
-      <CardHeader className="border-b border-border pb-4">
+      <CardHeader className="border-b border-border pb-4 pt-5">
         <CardTitle className="font-display leading-none tracking-[0.1em] text-foreground"
           style={{ fontSize: "clamp(1.6rem, 4vw, 2.4rem)" }}
         >
@@ -156,33 +180,53 @@ function WorkoutCard({ workout, index }: { workout: Workout; index: number }) {
           </CardDescription>
         )}
 
-        <CardAction className="flex flex-col items-end gap-1.5 shrink-0">
+        <CardAction className="flex flex-col items-end gap-2 shrink-0">
+          {/* ── Icon stat pills (magic 21 pattern) ─────────────────────── */}
           {duration && (
-            <span className="font-display tracking-[0.2em] text-2xl leading-none text-primary">
-              {duration}
-            </span>
+            <div className="flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-xs font-medium text-primary border border-primary/20">
+              <Timer className="h-3 w-3" />
+              <span className="font-display tracking-[0.15em]">{duration}</span>
+            </div>
           )}
-          <span className="text-sm text-muted-foreground tracking-widest">
-            {workout.workoutExercises.length} ex &middot; {totalSets} sets
-          </span>
+          <div className="flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-xs font-medium text-muted-foreground border border-border">
+            <Dumbbell className="h-3 w-3" />
+            <span className="tracking-widest">{workout.workoutExercises.length} EX · {totalSets} SETS</span>
+          </div>
           {totalVolume > 0 && (
-            <span className="text-xs font-medium tracking-widest text-cyan-400">
-              {Math.round(totalVolume).toLocaleString()} KG VOL
-            </span>
+            <div className="flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-xs font-medium text-cyan-400 border border-cyan-400/20">
+              <TrendingUp className="h-3 w-3" />
+              <span className="tracking-widest">{Math.round(totalVolume).toLocaleString()} KG</span>
+            </div>
           )}
         </CardAction>
       </CardHeader>
 
-      {/* ── Exercise list ───────────────────────────────────────────────── */}
+      {/* ── Exercise list (staggered, magic 21 pattern) ────────────────── */}
       <CardContent className="px-0 py-0">
-        {workout.workoutExercises.map((we, i) => (
-          <ExerciseRow
-            key={we.id}
-            workoutExercise={we}
-            index={i}
-            isLast={i === workout.workoutExercises.length - 1}
-          />
-        ))}
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden:  {},
+            visible: { transition: { staggerChildren: 0.07, delayChildren: 0.1 } },
+          }}
+        >
+          {workout.workoutExercises.map((we, i) => (
+            <motion.div
+              key={we.id}
+              variants={{
+                hidden:  { opacity: 0, y: 14 },
+                visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 120, damping: 14 } },
+              }}
+            >
+              <ExerciseRow
+                workoutExercise={we}
+                index={i}
+                isLast={i === workout.workoutExercises.length - 1}
+              />
+            </motion.div>
+          ))}
+        </motion.div>
       </CardContent>
     </Card>
   );
@@ -219,7 +263,7 @@ function ExerciseRow({
 
       {/* Exercise name + badge */}
       <div className="flex flex-wrap items-center gap-3 mb-4">
-        <span className="font-display text-lg leading-none w-8 shrink-0 text-muted-foreground/40">
+        <span className="font-display text-lg leading-none w-8 shrink-0 text-muted-foreground">
           {String(index + 1).padStart(2, "0")}
         </span>
         <span className="font-display tracking-[0.12em] leading-none text-foreground"
@@ -240,7 +284,7 @@ function ExerciseRow({
         <div className="ml-11 space-y-0">
           {/* Column headers */}
           <div
-            className="grid text-[10px] tracking-[0.2em] uppercase text-muted-foreground/50 pb-2"
+            className="grid text-[10px] tracking-[0.2em] uppercase text-muted-foreground pb-2"
             style={{ gridTemplateColumns: gridCols }}
           >
             <span>#</span>
