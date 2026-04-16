@@ -30,7 +30,7 @@ export default async function LogWorkoutPage({
     getLastSetsForExercises(userId, exercises.map(e => e.id)),
   ]);
 
-  const recentlyUsedIds = { push: pushRecent, pull: pullRecent, legs: legsRecent };
+  const recentlyUsedIds = { push: pushRecent, pull: pullRecent, legs: legsRecent, custom: [] as string[] };
 
   return (
     <main

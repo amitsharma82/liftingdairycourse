@@ -14,7 +14,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Trash2, Info, Play, RefreshCw } from "lucide-react";
+import { Plus, Trash2, Info, Play, RefreshCw, Clock, AlertTriangle } from "lucide-react";
 import SetRow, { type SetData, emptySet } from "./set-row";
 import type { getAllExercises } from "@/data/exercises";
 import type { LastSession }    from "@/data/exercises";
@@ -57,6 +57,8 @@ function fmtKg(kg: string | null): string {
   return Number.isInteger(n) ? `${n}` : n.toFixed(1);
 }
 
+const MAX_EXERCISE_MIN = 14;
+
 export default function ExerciseBlock({
   exercise,
   sets,
@@ -65,14 +67,16 @@ export default function ExerciseBlock({
   onRemove,
   onSwap,
   lastSession,
+  estimatedMinutes = 0,
 }: {
-  exercise:     Exercise;
-  sets:         SetData[];
-  alternatives: Exercise[];
-  onSetsChange: (sets: SetData[]) => void;
-  onRemove:     () => void;
-  onSwap:       (newExercise: Exercise) => void;
-  lastSession:  LastSession | null;
+  exercise:          Exercise;
+  sets:              SetData[];
+  alternatives:      Exercise[];
+  onSetsChange:      (sets: SetData[]) => void;
+  onRemove:          () => void;
+  onSwap:            (newExercise: Exercise) => void;
+  lastSession:       LastSession | null;
+  estimatedMinutes?: number;
 }) {
   const muscleStyle = MUSCLE_STYLE[exercise.muscleGroup] ?? MUSCLE_STYLE.other;
   const muscleLabel = MUSCLE_LABEL[exercise.muscleGroup] ?? "OTHER";
@@ -124,6 +128,22 @@ export default function ExerciseBlock({
           >
             {muscleLabel}
           </Badge>
+
+          {/* ── Time estimate badge ───────────────────────────────────── */}
+          {estimatedMinutes > 0 && (() => {
+            const isOver = estimatedMinutes > MAX_EXERCISE_MIN;
+            const color  = isOver ? "#ef4444" : "#a3e63580";
+            return (
+              <span
+                className="flex items-center gap-1 text-[10px] tracking-[0.15em] uppercase px-1.5 py-0.5 rounded-[2px] border font-medium"
+                style={{ color: isOver ? "#ef4444" : "#a3e635", borderColor: color, background: `${color}18` }}
+              >
+                {isOver ? <AlertTriangle size={10} /> : <Clock size={10} />}
+                ~{estimatedMinutes}m
+                {isOver && <span className="ml-0.5">OVER LIMIT</span>}
+              </span>
+            );
+          })()}
 
           {/* ── How-to dialog trigger ─────────────────────────────────── */}
           <Dialog>
