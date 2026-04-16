@@ -27,7 +27,7 @@ This project uses **Next.js 16.2.3** and **React 19.2.4** — versions that may 
 npm run dev      # Start dev server at http://localhost:3000
 npm run build    # Production build
 npm run start    # Start production server
-npm run lint     # Run ESLint
+npm run lint     # Run ESLint.
 ```
 
 No test runner is configured yet.
