@@ -129,8 +129,8 @@ export const SESSION_ROUTINES: Record<"push" | "pull" | "legs", SessionRoutine> 
         name:  "Sleeper Stretch",
         reps:  "30s each side",
         cue:   "Lie on your side, gently press the forearm toward the floor for internal rotation.",
-        // Lying on mat — same position as sleeper stretch (on side on mat)
-        image: `${BASE}/90_90_Hamstring/0.jpg`,
+        // Person lying on side — matches the sleeper stretch position
+        image: `${BASE}/Side_Lying_Clam/0.jpg`,
         steps: [
           "Lie on your side on a mat. Stack the shoulder you're lying on directly under you.",
           "Bend the lower elbow to 90° so your forearm points straight up.",
@@ -146,17 +146,17 @@ export const SESSION_ROUTINES: Record<"push" | "pull" | "legs", SessionRoutine> 
   pull: {
     warmup: [
       {
-        name:  "Cat-Cow",
-        reps:  "2 × 10 breaths",
-        cue:   "Arch and round the spine slowly in sync with your breathing — warm up the whole thoracic.",
-        // Person on all-fours on a mat — exact Cat-Cow starting position
-        image: `${BASE}/Cat_Stretch/0.jpg`,
+        name:  "Scapular Retractions",
+        reps:  "3 × 15",
+        cue:   "Pinch the shoulder blades together and hold 1 second — activates the rhomboids and mid-traps before rowing.",
+        // Standing pull position — rear delt and trap activation
+        image: `${BASE}/Band_Pull_Apart/0.jpg`,
         steps: [
-          "Start on all fours: wrists under shoulders, knees under hips.",
-          "Breathe in — let the belly drop toward the floor, lift your head and tailbone (Cow).",
-          "Breathe out — round your spine toward the ceiling, tuck chin and tailbone (Cat).",
-          "Flow smoothly between the two positions in sync with your breathing.",
-          "Move slowly — focus on feeling each spinal segment open and close.",
+          "Stand tall with a light resistance band or simply clasp your hands behind your back.",
+          "Draw the shoulder blades together and slightly downward — think 'put your shoulder blades in your back pockets'.",
+          "Hold the squeeze for 1 full second, feeling the rhomboids and mid-traps fire.",
+          "Release slowly to the start position — don't let the shoulders roll forward.",
+          "Repeat 15 times per set. This directly primes the muscles you'll use in all rows and pull-downs.",
         ],
       },
       {
@@ -219,8 +219,8 @@ export const SESSION_ROUTINES: Record<"push" | "pull" | "legs", SessionRoutine> 
         name:  "Lat Overhead Stretch",
         reps:  "30s each side",
         cue:   "Hold a fixed object at hip height, hinge back to feel a deep lat pull.",
-        // On all fours reaching forward — same lat lengthening as the overhead stretch
-        image: `${BASE}/All_Fours_Quad_Stretch/0.jpg`,
+        // Hip-hinge / lat-engaged position matching the stretch
+        image: `${BASE}/Bent_Over_One-Arm_Long_Bar_Row/0.jpg`,
         steps: [
           "Stand beside a fixed object at hip-to-chest height (squat rack, cable machine, door frame).",
           "Hold with one hand and step back until your arm is straight.",

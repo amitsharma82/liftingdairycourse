@@ -176,11 +176,18 @@ export default function ExerciseBlock({
 
               {/* Animated exercise image */}
               {imgUrl && (
-                <AnimatedExerciseImage
-                  src={imgUrl}
-                  alt={exercise.name}
-                  className="w-full h-44 rounded-sm"
-                />
+                <div className="relative rounded-sm overflow-hidden">
+                  <AnimatedExerciseImage
+                    src={imgUrl}
+                    alt={exercise.name}
+                    className="w-full h-52 rounded-sm"
+                  />
+                  {/* Cinematic gradient overlay — darkens bottom for text legibility */}
+                  <div
+                    className="absolute inset-x-0 bottom-0 h-16 pointer-events-none rounded-b-sm"
+                    style={{ background: "linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 100%)" }}
+                  />
+                </div>
               )}
 
               {/* Steps */}

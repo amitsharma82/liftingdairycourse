@@ -220,6 +220,32 @@
   to   { transform: scale(1.4);  opacity: 0;   }
 }
 
+/* ── Exercise image animation ──────────────────────────────── */
+/* Frame A: visible 0–44%, fade out 44–50%, hidden 50–94%, fade in 94–100% */
+@keyframes exFrameA {
+  0%,  44% { opacity: 1; }
+  50%, 94% { opacity: 0; }
+  100%     { opacity: 1; }
+}
+/* Frame B: offset by half cycle — starts hidden */
+@keyframes exFrameB {
+  0%,  44% { opacity: 0; }
+  50%, 94% { opacity: 1; }
+  100%     { opacity: 0; }
+}
+/* Ken Burns per-frame zoom — resets at cycle midpoint so each frame gets its own pan */
+@keyframes exBurnsA {
+  0%   { transform: scale(1.00) translate(0%, 0%);   }
+  44%  { transform: scale(1.06) translate(-1%, -1%); }
+  50%  { transform: scale(1.00) translate(0%, 0%);   }
+  100% { transform: scale(1.00) translate(0%, 0%);   }
+}
+@keyframes exBurnsB {
+  0%,  50% { transform: scale(1.00) translate(0%, 0%);  }
+  94%      { transform: scale(1.06) translate(1%, -1%); }
+  100%     { transform: scale(1.00) translate(0%, 0%);  }
+}
+
 /* ═══════════════════════════════════════════════════════════════
    ANIMATION UTILITY CLASSES
 ═══════════════════════════════════════════════════════════════ */

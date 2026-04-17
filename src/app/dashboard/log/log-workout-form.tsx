@@ -77,15 +77,6 @@ const SESSION_CONFIG: Record<
   },
 };
 
-// ─── Combined warm-up / cool-down pools (all session types, deduplicated) ─────
-
-const ALL_WARMUPS: RoutineExercise[] = Object.values(SESSION_ROUTINES)
-  .flatMap(r => r.warmup)
-  .filter((ex, i, arr) => arr.findIndex(e => e.name === ex.name) === i);
-
-const ALL_COOLDOWNS: RoutineExercise[] = Object.values(SESSION_ROUTINES)
-  .flatMap(r => r.stretch)
-  .filter((ex, i, arr) => arr.findIndex(e => e.name === ex.name) === i);
 
 const MUSCLE_LABELS: Record<string, string> = {
   chest: "CHEST", back: "BACK", shoulders: "SHOULDERS",
@@ -317,6 +308,25 @@ function CustomSessionBuilder({
   const goalMeta     = fitnessGoal ? GOAL_META[fitnessGoal] : null;
   const goalTopCats  = goalMeta?.categories.slice(0, 2) ?? [];
 
+  // Derive relevant routine pools from the muscles the user has actually picked.
+  // Push muscles → push routines; pull muscles → pull; legs → legs; mix → all.
+  const pickedMuscles = new Set(picked.map(p => p.exercise.muscleGroup));
+  const isPush = ["chest", "shoulders", "triceps"].some(m => pickedMuscles.has(m));
+  const isPull = ["back", "biceps"].some(m => pickedMuscles.has(m));
+  const isLegs = ["legs", "glutes"].some(m => pickedMuscles.has(m));
+  const relevantSessions = ([
+    isPush ? "push" : null,
+    isPull ? "pull" : null,
+    isLegs ? "legs" : null,
+  ].filter(Boolean) as ("push" | "pull" | "legs")[]);
+  const sessionPool = relevantSessions.length > 0 ? relevantSessions : (["push", "pull", "legs"] as const);
+  const contextualWarmups = sessionPool
+    .flatMap(s => SESSION_ROUTINES[s].warmup)
+    .filter((ex, i, arr) => arr.findIndex(e => e.name === ex.name) === i);
+  const contextualCooldowns = sessionPool
+    .flatMap(s => SESSION_ROUTINES[s].stretch)
+    .filter((ex, i, arr) => arr.findIndex(e => e.name === ex.name) === i);
+
   const filtered = exercises.filter(ex => {
     if (pickedIds.has(ex.id)) return false;
     if (muscleFilter && ex.muscleGroup !== muscleFilter) return false;
@@ -423,7 +433,7 @@ function CustomSessionBuilder({
 
         {showWarmup && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {ALL_WARMUPS.map(ex => (
+            {contextualWarmups.map(ex => (
               <RoutineCheckbox
                 key={ex.name}
                 ex={ex}
@@ -594,7 +604,7 @@ function CustomSessionBuilder({
 
         {showCooldown && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {ALL_COOLDOWNS.map(ex => (
+            {contextualCooldowns.map(ex => (
               <RoutineCheckbox
                 key={ex.name}
                 ex={ex}
@@ -757,14 +767,20 @@ function RoutineCard({
         </DialogHeader>
 
         {/* Animated exercise image — full width */}
-        <AnimatedExerciseImage
-          src={exercise.image}
-          alt={exercise.name}
-          accent={accent}
-          accentBg={accentBg}
-          accentBorder={accentBorder}
-          className="w-full h-52 rounded-sm"
-        />
+        <div className="relative rounded-sm overflow-hidden">
+          <AnimatedExerciseImage
+            src={exercise.image}
+            alt={exercise.name}
+            accent={accent}
+            accentBg={accentBg}
+            accentBorder={accentBorder}
+            className="w-full h-52 rounded-sm"
+          />
+          <div
+            className="absolute inset-x-0 bottom-0 h-16 pointer-events-none"
+            style={{ background: "linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 100%)" }}
+          />
+        </div>
 
         {/* Step-by-step instructions */}
         <ol className="space-y-3 py-1">
