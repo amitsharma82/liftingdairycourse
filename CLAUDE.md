@@ -38,24 +38,43 @@ No test runner is configured yet.
 This is a **Next.js App Router** project with TypeScript, Tailwind CSS v4, Drizzle ORM on Neon (serverless Postgres), and Clerk for authentication.
 
 **Entry points:**
-- `src/app/layout.tsx` — root layout; sets up Geist fonts via CSS variables and wraps all pages
-- `src/app/page.tsx` — home page (`/` route)
-- `src/app/globals.css` — global styles; imports Tailwind v4 via `@import "tailwindcss"` and defines CSS custom properties for background/foreground colors
+- `src/app/layout.tsx` — root layout; sets up Geist fonts via CSS variables
+- `src/app/page.tsx` — public home/landing page
+- `src/app/onboarding/page.tsx` — first-time user setup (profile, goals, activity level)
+- `src/app/dashboard/page.tsx` — main authenticated view; date-filtered workout feed
+- `src/app/globals.css` — global styles; imports Tailwind v4 via `@import "tailwindcss"` and defines CSS custom properties
 
-**Tailwind v4 note:** This project uses Tailwind CSS v4, which configures via `postcss.config.mjs` and `@import "tailwindcss"` in CSS — there is no `tailwind.config.js`. Theme tokens are set with `@theme inline` blocks in CSS, not in a JS config file.
+**Tailwind v4 note:** No `tailwind.config.js`. Theme tokens live in `@theme inline` blocks in CSS. Configure via `postcss.config.mjs`.
 
-**Routing:** Add new routes as folders under `src/app/`. Each folder needs a `page.tsx` to be a route. Layouts can be nested.
+**Routing:** Add new routes as folders under `src/app/`. Each folder needs a `page.tsx`.
 
 ### Auth — Clerk
 
-Auth is handled by `@clerk/nextjs`. Server-side: `import { auth } from "@clerk/nextjs/server"` then `const { userId } = await auth()`. All data queries and mutations must check `userId` and filter by it. Sign-in/up pages live at `src/app/sign-in/[[...sign-in]]/` and `src/app/sign-up/[[...sign-up]]/`.
+Auth is handled by `@clerk/nextjs`. There is **no `middleware.ts`** — each protected page does its own redirect:
+
+```ts
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+
+const { userId } = await auth();
+if (!userId) redirect('/sign-in');
+```
+
+`userId` must always come from `auth()` on the server — never from URL params or request bodies.
 
 ### Database — Drizzle ORM + Neon
 
-- Schema: `src/db/schema.ts` — tables: `userProfiles`, `exercises`, `programs`, `programWorkouts`, `programWorkoutExercises`, `workouts`, `workoutExercises`, `workoutSets`
+- Schema: `src/db/schema.ts`
 - Connection: `src/db/index.ts` — uses `drizzle-orm/neon-http` via `DATABASE_URL` env var
 - **Neon-http limitation:** `db.transaction()` does not support inter-dependent awaits inside a single transaction callback. Use sequential top-level inserts instead (see `src/actions/workouts.ts::logWorkout` for the established pattern).
-- Migrations/seeding: `src/db/seed.ts` (run via `npm run seed`); schema changes require Drizzle migration tooling.
+
+**Schema tables:** `userProfiles`, `exercises`, `programs`, `programWorkouts`, `programWorkoutExercises`, `workouts`, `workoutExercises`, `workoutSets`
+
+**Key schema conventions:**
+- `exercises.createdBy` — `NULL` means a global/system exercise; a Clerk user ID means user-created
+- `workouts.programWorkoutId` — `NULL` means an ad-hoc session; non-null means the user is following a program slot
+
+**Enums defined in schema:** `category` (strength/cardio/bodyweight/olympic/stretching), `muscle_group`, `gender`, `fitness_goal`, `activity_level`
 
 ### Data Layer
 
@@ -65,13 +84,32 @@ Auth is handled by `@clerk/nextjs`. Server-side: `import { auth } from "@clerk/n
 - `src/data/workouts.ts` — `getWorkoutsByDate`, `getWorkoutDates`
 - `src/actions/workouts.ts` — `"use server"` mutations: `logWorkout`, `deleteWorkout`
 
+**Note:** `src/app/api/workouts/route.ts` and `src/app/api/workout-dates/route.ts` exist but are legacy. Per `docs/data-fetching.md`, do not add new API route-based fetching — use Server Components + `/data` helpers instead.
+
 ### UI Layer
 
 All interactive UI must use **shadcn/ui** components from `src/components/ui/`. Do not create custom interactive components or use other libraries. Add new shadcn components via `npx shadcn@latest add <component-name>`. Do not edit files in `src/components/ui/` manually. See `docs/ui.md` for the full rule.
 
+Non-shadcn components in `src/components/` are layout/decorative only (no interactivity): `barbell-hero.tsx`, `logo.tsx`, `header-auth.tsx`, `ripple-button.tsx`, `animated-exercise-image.tsx`.
+
 Key UI libraries in use: `lucide-react` (icons), `motion` (animations), `react-day-picker` (calendar), `date-fns` (date utilities), `@base-ui/react` (base primitives).
 
 `src/lib/utils.ts` exports `cn()` (clsx + tailwind-merge) — use this for all conditional className composition.
+
+### Static Data
+
+`src/lib/session-routines.ts` exports `SESSION_ROUTINES` — a static record keyed by `"push" | "pull" | "legs"`, each with `warmup` and `stretch` arrays of `RoutineExercise` objects (name, reps, cue, image URL, steps). These are shown in the workout logging flow as warm-up/cool-down guidance.
+
+### Dashboard Flow
+
+The dashboard (`src/app/dashboard/`) is the core feature area:
+- `date-nav.tsx` — client component for navigating workout dates (prev/next day, calendar popover)
+- `workout-feed.tsx` — displays logged workouts for a selected date
+- `log/page.tsx` — workout logging page
+- `log/log-workout-form.tsx` — main form orchestrating exercise and set entry
+- `log/exercise-block.tsx` — per-exercise UI within the log form
+- `log/exercise-search.tsx` — exercise search/select UI
+- `log/set-row.tsx` — individual set entry row (weight, reps, RPE, RIR)
 
 <!-- code-review-graph MCP tools -->
 ## MCP Tools: code-review-graph
