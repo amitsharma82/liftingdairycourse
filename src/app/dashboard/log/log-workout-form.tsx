@@ -1190,6 +1190,7 @@ export default function LogWorkoutForm({
         {/* ── Staggered exercise blocks (magic 21 pattern) ───────────────── */}
         <motion.div
           className="space-y-4"
+          aria-live="polite"
           initial="hidden"
           animate="visible"
           variants={{

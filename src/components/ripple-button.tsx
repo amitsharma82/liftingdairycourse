@@ -96,7 +96,7 @@ const RippleButton = forwardRef<HTMLButtonElement, Props>(
         {ripples.map(r => (
           <span
             key={r.id}
-            aria-hidden
+            aria-hidden="true"
             className="pointer-events-none absolute rounded-full"
             style={{
               left:       r.x - r.size / 2,

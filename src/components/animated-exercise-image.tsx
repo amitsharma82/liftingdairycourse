@@ -51,6 +51,8 @@ export function AnimatedExerciseImage({
   if (failed) {
     return (
       <div
+        role="img"
+        aria-label={alt}
         className={`${className} flex items-center justify-center border overflow-hidden`}
         style={{ background: bg, borderColor: border }}
       >
@@ -64,10 +66,15 @@ export function AnimatedExerciseImage({
   // Single static image (no second frame available)
   if (!f1) {
     return (
-      <div className={`${className} relative overflow-hidden bg-muted`}>
+      <div 
+        role="img" 
+        aria-label={alt}
+        className={`${className} relative overflow-hidden bg-muted`}
+      >
         <img
           src={f0}
-          alt={alt}
+          alt=""
+          aria-hidden="true"
           className="absolute inset-0 w-full h-full object-contain"
           onError={() => setFailed(true)}
         />
@@ -79,11 +86,16 @@ export function AnimatedExerciseImage({
   const animB = `exFrameB ${CYCLE}s ease-in-out infinite, exBurnsB ${CYCLE}s ease-in-out infinite`;
 
   return (
-    <div className={`${className} relative overflow-hidden bg-muted`}>
+    <div 
+      role="img" 
+      aria-label={`${alt} animation`}
+      className={`${className} relative overflow-hidden bg-muted`}
+    >
       {/* Frame 0 — start position */}
       <img
         src={f0}
-        alt={alt}
+        alt=""
+        aria-hidden="true"
         className="absolute inset-0 w-full h-full object-contain"
         style={{ animation: animA, willChange: "opacity, transform" }}
         onError={() => setFailed(true)}
@@ -93,7 +105,7 @@ export function AnimatedExerciseImage({
       <img
         src={f1}
         alt=""
-        aria-hidden
+        aria-hidden="true"
         className="absolute inset-0 w-full h-full object-contain"
         style={{
           animation: f1Ready ? animB : "none",
