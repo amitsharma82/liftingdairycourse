@@ -27,14 +27,15 @@ This project uses **Next.js 16.2.3** and **React 19.2.4** — versions that may 
 npm run dev      # Start dev server at http://localhost:3000
 npm run build    # Production build
 npm run start    # Start production server
-npm run lint     # Run ESLint.
+npm run lint     # Run ESLint
+npm run seed     # Seed the database (runs src/db/seed.ts via tsx)
 ```
 
 No test runner is configured yet.
 
 ## Architecture
 
-This is a **Next.js App Router** project with TypeScript and Tailwind CSS v4.
+This is a **Next.js App Router** project with TypeScript, Tailwind CSS v4, Drizzle ORM on Neon (serverless Postgres), and Clerk for authentication.
 
 **Entry points:**
 - `src/app/layout.tsx` — root layout; sets up Geist fonts via CSS variables and wraps all pages
@@ -44,6 +45,33 @@ This is a **Next.js App Router** project with TypeScript and Tailwind CSS v4.
 **Tailwind v4 note:** This project uses Tailwind CSS v4, which configures via `postcss.config.mjs` and `@import "tailwindcss"` in CSS — there is no `tailwind.config.js`. Theme tokens are set with `@theme inline` blocks in CSS, not in a JS config file.
 
 **Routing:** Add new routes as folders under `src/app/`. Each folder needs a `page.tsx` to be a route. Layouts can be nested.
+
+### Auth — Clerk
+
+Auth is handled by `@clerk/nextjs`. Server-side: `import { auth } from "@clerk/nextjs/server"` then `const { userId } = await auth()`. All data queries and mutations must check `userId` and filter by it. Sign-in/up pages live at `src/app/sign-in/[[...sign-in]]/` and `src/app/sign-up/[[...sign-up]]/`.
+
+### Database — Drizzle ORM + Neon
+
+- Schema: `src/db/schema.ts` — tables: `userProfiles`, `exercises`, `programs`, `programWorkouts`, `programWorkoutExercises`, `workouts`, `workoutExercises`, `workoutSets`
+- Connection: `src/db/index.ts` — uses `drizzle-orm/neon-http` via `DATABASE_URL` env var
+- **Neon-http limitation:** `db.transaction()` does not support inter-dependent awaits inside a single transaction callback. Use sequential top-level inserts instead (see `src/actions/workouts.ts::logWorkout` for the established pattern).
+- Migrations/seeding: `src/db/seed.ts` (run via `npm run seed`); schema changes require Drizzle migration tooling.
+
+### Data Layer
+
+**All data fetching must happen in Server Components via helpers in `src/data/`.** Never fetch in Client Components, Route Handlers, or Server Actions. See `docs/data-fetching.md` for the full rule.
+
+- `src/data/exercises.ts` — `getAllExercises`, `getRecentlyUsedExerciseIds`, `getLastSetsForExercises`
+- `src/data/workouts.ts` — `getWorkoutsByDate`, `getWorkoutDates`
+- `src/actions/workouts.ts` — `"use server"` mutations: `logWorkout`, `deleteWorkout`
+
+### UI Layer
+
+All interactive UI must use **shadcn/ui** components from `src/components/ui/`. Do not create custom interactive components or use other libraries. Add new shadcn components via `npx shadcn@latest add <component-name>`. Do not edit files in `src/components/ui/` manually. See `docs/ui.md` for the full rule.
+
+Key UI libraries in use: `lucide-react` (icons), `motion` (animations), `react-day-picker` (calendar), `date-fns` (date utilities), `@base-ui/react` (base primitives).
+
+`src/lib/utils.ts` exports `cn()` (clsx + tailwind-merge) — use this for all conditional className composition.
 
 <!-- code-review-graph MCP tools -->
 ## MCP Tools: code-review-graph
