@@ -2,9 +2,11 @@ import Link           from "next/link";
 import { auth }      from "@clerk/nextjs/server";
 import { redirect }  from "next/navigation";
 import { getWorkoutsByDate, getWorkoutDates } from "@/data/workouts";
+import { getProfile } from "@/data/profile";
 import { buttonVariants } from "@/components/ui/button";
 import DateNav        from "./date-nav";
 import WorkoutFeed    from "./workout-feed";
+import ProfileBanner  from "./profile-banner";
 
 function parseDateParam(raw?: string): string {
   if (raw && /^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
@@ -23,9 +25,10 @@ export default async function DashboardPage({
   const params = await searchParams;
   const date   = parseDateParam(params.date);
 
-  const [workouts, workoutDates] = await Promise.all([
+  const [workouts, workoutDates, profile] = await Promise.all([
     getWorkoutsByDate(userId, date),
     getWorkoutDates(userId),
+    getProfile(userId),
   ]);
 
   return (
@@ -97,6 +100,9 @@ export default async function DashboardPage({
             style={{ background: "#a3e635" }}
           />
         </div>
+
+        {/* ── First-visit profile prompt ───────────────────────────────────── */}
+        {!profile && <ProfileBanner />}
 
         {/* ── Workout feed ─────────────────────────────────────────────────── */}
         <WorkoutFeed workouts={workouts} date={date} />

@@ -341,7 +341,7 @@ function CTAButtons() {
 
   return (
     <div className="flex flex-wrap gap-4 mt-12 animate-rise-in" style={{ animationDelay: "0.5s" }}>
-      <SignUpButton mode="modal" afterSignUpUrl="/onboarding">
+      <SignUpButton mode="modal" forceRedirectUrl="/onboarding">
         <RippleButton
           variant="primary"
           className="font-mono text-sm tracking-widest px-8 py-4 bg-lime-400 text-zinc-900 font-medium uppercase cursor-pointer active:scale-95 transition-transform"
@@ -351,7 +351,7 @@ function CTAButtons() {
         </RippleButton>
       </SignUpButton>
 
-      <SignInButton mode="modal">
+      <SignInButton mode="modal" forceRedirectUrl="/onboarding">
         <RippleButton
           variant="ghost"
           className="font-mono text-sm tracking-widest px-8 py-4 border-2 border-white/70 text-white uppercase cursor-pointer active:scale-95 transition-transform hover:bg-white hover:text-zinc-900"
@@ -784,7 +784,7 @@ export default function Home() {
         </div>
 
         {/* Glowing ripple mega-button */}
-        <SignUpButton mode="modal" afterSignUpUrl="/onboarding">
+        <SignUpButton mode="modal" forceRedirectUrl="/onboarding">
           <RippleButton
             variant="primary"
             className="font-mono text-sm tracking-widest px-12 py-6 bg-lime-400 text-zinc-900 font-medium uppercase whitespace-nowrap cursor-pointer active:scale-95 transition-transform hover:bg-lime-300"

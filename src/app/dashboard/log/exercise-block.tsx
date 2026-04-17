@@ -20,6 +20,7 @@ import type { getAllExercises } from "@/data/exercises";
 import type { LastSession }    from "@/data/exercises";
 import { EXERCISE_INFO }   from "@/lib/exercise-info";
 import { EXERCISE_IMAGES } from "@/lib/exercise-images";
+import { AnimatedExerciseImage } from "@/components/animated-exercise-image";
 
 type Exercise = Awaited<ReturnType<typeof getAllExercises>>[number];
 
@@ -105,15 +106,12 @@ export default function ExerciseBlock({
       {/* ── Exercise header ────────────────────────────────────────────── */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-card">
         <div className="flex items-center gap-3 flex-wrap">
-          {/* Thumbnail */}
+          {/* Animated thumbnail */}
           {imgUrl && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <AnimatedExerciseImage
               src={imgUrl}
               alt={exercise.name}
-              width={44}
-              height={44}
-              className="w-11 h-11 rounded-sm object-cover shrink-0 bg-muted"
+              className="w-11 h-11 rounded-sm shrink-0"
             />
           )}
           <span
@@ -176,13 +174,12 @@ export default function ExerciseBlock({
                 </div>
               </DialogHeader>
 
-              {/* Exercise image */}
+              {/* Animated exercise image */}
               {imgUrl && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
+                <AnimatedExerciseImage
                   src={imgUrl}
                   alt={exercise.name}
-                  className="w-full h-44 object-cover rounded-sm bg-muted"
+                  className="w-full h-44 rounded-sm"
                 />
               )}
 

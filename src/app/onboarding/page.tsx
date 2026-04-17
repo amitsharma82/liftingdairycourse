@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { LogoMark } from "@/components/logo";
+import { saveProfile } from "@/actions/profile";
+import { checkProfileExists } from "@/actions/profile-check";
 
 // ── Palette ─────────────────────────────────────────────────────────────────
 const LIME   = "#a3e635";
@@ -169,9 +171,14 @@ export default function OnboardingPage() {
     units:     "KG",
   });
 
-  // Redirect unauthenticated visitors back to home
+  // Redirect unauthenticated visitors back to home;
+  // redirect users who already completed onboarding straight to dashboard.
   useEffect(() => {
-    if (isLoaded && !isSignedIn) router.replace("/");
+    if (!isLoaded) return;
+    if (!isSignedIn) { router.replace("/"); return; }
+    checkProfileExists().then(exists => {
+      if (exists) router.replace("/dashboard");
+    });
   }, [isLoaded, isSignedIn, router]);
 
   if (!isLoaded || !isSignedIn) {
@@ -203,15 +210,36 @@ export default function OnboardingPage() {
   const handleNext = async () => {
     if (step < total) {
       setStep(s => s + 1);
-    } else {
-      setSaving(true);
-      // TODO: persist `profile` via server action / API route
-      // For now we store in localStorage as a placeholder
-      if (typeof window !== "undefined") {
-        localStorage.setItem("ld_profile", JSON.stringify(profile));
-      }
-      router.push("/dashboard");
+      return;
     }
+
+    setSaving(true);
+
+    const goalMap: Record<Goal, "lose_weight" | "build_muscle" | "maintain" | "improve_fitness"> = {
+      FAT_LOSS:  "lose_weight",
+      SIZE:      "build_muscle",
+      STRENGTH:  "build_muscle",
+      ENDURANCE: "improve_fitness",
+    };
+    const activityFromFreq = (f: number): "light" | "moderate" | "active" | "very_active" => {
+      if (f <= 2) return "light";
+      if (f <= 5) return "moderate";
+      if (f <= 6) return "active";
+      return "very_active";
+    };
+
+    await saveProfile({
+      displayName:   null,
+      avatarEmoji:   null,
+      gender:        profile.sex ? (profile.sex.toLowerCase() as "male" | "female" | "other") : null,
+      dateOfBirth:   null,
+      heightCm:      null,
+      weightKg:      null,
+      fitnessGoal:   profile.goal ? goalMap[profile.goal] : null,
+      activityLevel: activityFromFreq(profile.frequency),
+    });
+
+    router.push("/dashboard");
   };
 
   return (

@@ -6,6 +6,7 @@ import {
   integer,
   numeric,
   timestamp,
+  date,
 } from 'drizzle-orm/pg-core';
 
 // ─── Enums ────────────────────────────────────────────────────────────────────
@@ -30,6 +31,34 @@ export const muscleGroupEnum = pgEnum('muscle_group', [
   'full_body',
   'other',
 ]);
+
+export const genderEnum = pgEnum('gender', [
+  'male', 'female', 'other', 'prefer_not_to_say',
+]);
+
+export const fitnessGoalEnum = pgEnum('fitness_goal', [
+  'lose_weight', 'build_muscle', 'maintain', 'improve_fitness',
+]);
+
+export const activityLevelEnum = pgEnum('activity_level', [
+  'sedentary', 'light', 'moderate', 'active', 'very_active',
+]);
+
+// ─── User Profiles ────────────────────────────────────────────────────────────
+
+export const userProfiles = pgTable('user_profiles', {
+  userId:        text('user_id').primaryKey(),
+  displayName:   text('display_name'),
+  avatarEmoji:   text('avatar_emoji'),
+  gender:        genderEnum('gender'),
+  dateOfBirth:   date('date_of_birth'),
+  heightCm:      numeric('height_cm'),
+  weightKg:      numeric('weight_kg'),
+  fitnessGoal:   fitnessGoalEnum('fitness_goal'),
+  activityLevel: activityLevelEnum('activity_level'),
+  createdAt:     timestamp('created_at').notNull().defaultNow(),
+  updatedAt:     timestamp('updated_at').notNull().defaultNow(),
+});
 
 // ─── Exercise Library ─────────────────────────────────────────────────────────
 

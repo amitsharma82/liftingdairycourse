@@ -1,6 +1,7 @@
 import { auth }            from "@clerk/nextjs/server";
 import { redirect }        from "next/navigation";
 import { getAllExercises, getRecentlyUsedExerciseIds, getLastSetsForExercises } from "@/data/exercises";
+import { getProfile }      from "@/data/profile";
 import LogWorkoutForm      from "./log-workout-form";
 
 function parseDateParam(raw?: string): string {
@@ -23,11 +24,12 @@ export default async function LogWorkoutPage({
   // Fetch exercises first so we have IDs for the history query
   const exercises = await getAllExercises(userId);
 
-  const [pushRecent, pullRecent, legsRecent, lastSessions] = await Promise.all([
+  const [pushRecent, pullRecent, legsRecent, lastSessions, profile] = await Promise.all([
     getRecentlyUsedExerciseIds(userId, ["chest", "shoulders", "triceps"]),
     getRecentlyUsedExerciseIds(userId, ["back", "biceps"]),
     getRecentlyUsedExerciseIds(userId, ["legs", "glutes"]),
     getLastSetsForExercises(userId, exercises.map(e => e.id)),
+    getProfile(userId),
   ]);
 
   const recentlyUsedIds = { push: pushRecent, pull: pullRecent, legs: legsRecent, custom: [] as string[] };
@@ -88,7 +90,13 @@ export default async function LogWorkoutPage({
           />
         </div>
 
-        <LogWorkoutForm date={date} exercises={exercises} recentlyUsedIds={recentlyUsedIds} lastSessions={lastSessions} />
+        <LogWorkoutForm
+          date={date}
+          exercises={exercises}
+          recentlyUsedIds={recentlyUsedIds}
+          lastSessions={lastSessions}
+          fitnessGoal={profile?.fitnessGoal ?? null}
+        />
       </div>
     </main>
   );

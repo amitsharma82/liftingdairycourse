@@ -23,6 +23,7 @@ import { logWorkout } from "@/actions/workouts";
 import type { getAllExercises } from "@/data/exercises";
 import type { LastSession }    from "@/data/exercises";
 import { SESSION_ROUTINES, type RoutineExercise } from "@/lib/session-routines";
+import { AnimatedExerciseImage } from "@/components/animated-exercise-image";
 
 type Exercise = Awaited<ReturnType<typeof getAllExercises>>[number];
 type SessionType = "push" | "pull" | "legs" | "custom";
@@ -93,6 +94,49 @@ const MUSCLE_LABELS: Record<string, string> = {
 };
 
 const EXERCISES_PER_SESSION = 4;
+
+// ─── Fitness-goal metadata ────────────────────────────────────────────────────
+
+type FitnessGoal = "lose_weight" | "build_muscle" | "maintain" | "improve_fitness";
+
+const GOAL_META: Record<FitnessGoal, {
+  label:       string;
+  tagline:     string;
+  color:       string;
+  // categories ranked best → least for this goal
+  categories:  string[];
+  // session types that best serve this goal
+  sessions:    SessionType[];
+}> = {
+  build_muscle: {
+    label:      "BUILD MUSCLE",
+    tagline:    "Prioritising heavy compound lifts & progressive overload",
+    color:      "#a3e635",
+    categories: ["strength", "olympic", "bodyweight", "cardio", "stretching"],
+    sessions:   ["push", "pull", "legs"],
+  },
+  lose_weight: {
+    label:      "LOSE WEIGHT",
+    tagline:    "Prioritising high-rep work & cardio to maximise calorie burn",
+    color:      "#fb923c",
+    categories: ["cardio", "bodyweight", "strength", "olympic", "stretching"],
+    sessions:   ["legs", "custom"],
+  },
+  improve_fitness: {
+    label:      "IMPROVE FITNESS",
+    tagline:    "Prioritising functional movements & conditioning",
+    color:      "#22d3ee",
+    categories: ["cardio", "bodyweight", "strength", "olympic", "stretching"],
+    sessions:   ["push", "pull", "legs", "custom"],
+  },
+  maintain: {
+    label:      "MAINTAIN",
+    tagline:    "Balanced selection across all categories",
+    color:      "#c084fc",
+    categories: ["strength", "cardio", "bodyweight", "olympic", "stretching"],
+    sessions:   ["push", "pull", "legs"],
+  },
+};
 
 // ─── Time estimation ──────────────────────────────────────────────────────────
 const WARMUP_MIN    = 8;   // 4 exercises × ~2 min
@@ -165,16 +209,36 @@ function pickRandom<T>(arr: T[], n: number): T[] {
 
 /**
  * Picks EXERCISES_PER_SESSION exercises from pool, strongly preferring ones
- * NOT in recentIds. Falls back to recent ones only if the fresh pool is too small.
+ * NOT in recentIds, and biasing towards goal-relevant categories when a goal
+ * is provided. Falls back to recent ones only if the fresh pool is too small.
  */
-function pickFresh(pool: Exercise[], recentIds: string[]): Exercise[] {
-  const fresh    = pool.filter(e => !recentIds.includes(e.id));
-  const recent   = pool.filter(e =>  recentIds.includes(e.id));
-  const n        = EXERCISES_PER_SESSION;
+function pickFresh(pool: Exercise[], recentIds: string[], goal?: FitnessGoal | null): Exercise[] {
+  const n          = EXERCISES_PER_SESSION;
+  const topCats    = goal ? GOAL_META[goal].categories.slice(0, 2) : [];
 
-  if (fresh.length >= n) return pickRandom(fresh, n);
-  // Not enough fresh — fill the rest from recent
-  return [...pickRandom(fresh, fresh.length), ...pickRandom(recent, n - fresh.length)];
+  // Split fresh pool into goal-preferred and everything else
+  const freshGoal  = pool.filter(e => !recentIds.includes(e.id) && topCats.includes(e.category));
+  const freshOther = pool.filter(e => !recentIds.includes(e.id) && !topCats.includes(e.category));
+  const recentPool = pool.filter(e =>  recentIds.includes(e.id));
+
+  // Take up to half from goal-matched fresh, fill the rest from other fresh then recent
+  const goalCount  = Math.min(Math.ceil(n / 2), freshGoal.length);
+  const remaining  = n - goalCount;
+  const filler     = [...freshOther, ...recentPool];
+
+  const picked = [
+    ...pickRandom(freshGoal, goalCount),
+    ...pickRandom(filler,    Math.min(remaining, filler.length)),
+  ];
+
+  // Fallback: if we still don't have enough, fill from entire pool
+  if (picked.length < n) {
+    const alreadyIds = new Set(picked.map(e => e.id));
+    const extra      = pool.filter(e => !alreadyIds.has(e.id));
+    picked.push(...pickRandom(extra, n - picked.length));
+  }
+
+  return picked.slice(0, n);
 }
 
 // ─── Custom session builder ───────────────────────────────────────────────────
@@ -221,10 +285,12 @@ function RoutineCheckbox({
 
 function CustomSessionBuilder({
   exercises,
+  fitnessGoal,
   onStart,
   onBack,
 }: {
   exercises: Exercise[];
+  fitnessGoal?: FitnessGoal | null;
   onStart: (params: {
     name:     string;
     mainExercises: SelectedExercise[];
@@ -238,6 +304,7 @@ function CustomSessionBuilder({
   const [sessionName,   setSessionName]   = useState("Custom Session");
   const [query,         setQuery]         = useState("");
   const [muscleFilter,  setMuscleFilter]  = useState<string | null>(null);
+  const [goalFilter,    setGoalFilter]    = useState(false);
   const [picked,        setPicked]        = useState<SelectedExercise[]>([]);
   const [warmup,        setWarmup]        = useState<RoutineExercise[]>([]);
   const [cooldown,      setCooldown]      = useState<RoutineExercise[]>([]);
@@ -245,12 +312,15 @@ function CustomSessionBuilder({
   const [showCooldown,  setShowCooldown]  = useState(false);
   const [error,         setError]         = useState<string | null>(null);
 
-  const pickedIds = new Set(picked.map(p => p.exercise.id));
+  const pickedIds    = new Set(picked.map(p => p.exercise.id));
   const muscleGroups = [...new Set(exercises.map(e => e.muscleGroup))].sort();
+  const goalMeta     = fitnessGoal ? GOAL_META[fitnessGoal] : null;
+  const goalTopCats  = goalMeta?.categories.slice(0, 2) ?? [];
 
   const filtered = exercises.filter(ex => {
     if (pickedIds.has(ex.id)) return false;
     if (muscleFilter && ex.muscleGroup !== muscleFilter) return false;
+    if (goalFilter && !goalTopCats.includes(ex.category)) return false;
     if (query && !ex.name.toLowerCase().includes(query.toLowerCase())) return false;
     return true;
   });
@@ -419,6 +489,23 @@ function CustomSessionBuilder({
           />
         </div>
 
+        {/* Goal filter — only shown when user has a goal set */}
+        {goalMeta && (
+          <button
+            type="button"
+            onClick={() => setGoalFilter(v => !v)}
+            className="flex items-center gap-2 text-[10px] tracking-[0.18em] uppercase font-mono px-3 py-1.5 rounded-sm border transition-all"
+            style={{
+              borderColor: goalFilter ? goalMeta.color : `${goalMeta.color}40`,
+              background:  goalFilter ? `${goalMeta.color}18` : `${goalMeta.color}06`,
+              color:       goalMeta.color,
+            }}
+          >
+            <span>★</span>
+            {goalFilter ? `FOR ${goalMeta.label} (ON)` : `FOR ${goalMeta.label}`}
+          </button>
+        )}
+
         {/* Muscle group filter */}
         <div className="flex flex-wrap gap-1.5">
           <Button
@@ -577,58 +664,7 @@ function PhaseHeader({
   );
 }
 
-// ─── Image with fallback ──────────────────────────────────────────────────────
-// Always renders a fixed-size box. Shows the photo when it loads; shows a
-// styled placeholder when it fails, so every exercise always has an image area.
-
-function ExerciseImage({
-  src,
-  alt,
-  accent,
-  accentBg,
-  accentBorder,
-  className,
-  fallbackClassName,
-}: {
-  src:              string;
-  alt:              string;
-  accent:           string;
-  accentBg:         string;
-  accentBorder:     string;
-  className:        string;       // applied to the <img>
-  fallbackClassName:string;       // applied to the fallback <div>
-}) {
-  const [failed, setFailed] = useState(false);
-  const initials = alt
-    .split(" ")
-    .slice(0, 2)
-    .map((w) => w[0])
-    .join("")
-    .toUpperCase();
-
-  if (failed) {
-    return (
-      <div
-        className={`${fallbackClassName} flex flex-col items-center justify-center gap-1 rounded-sm border`}
-        style={{ borderColor: accentBorder, background: accentBg }}
-      >
-        <span className="font-display text-xs font-bold" style={{ color: accent }}>
-          {initials}
-        </span>
-      </div>
-    );
-  }
-
-  return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={src}
-      alt={alt}
-      className={`${className} object-cover rounded-sm bg-muted`}
-      onError={() => setFailed(true)}
-    />
-  );
-}
+// ExerciseImage is now AnimatedExerciseImage (imported at top)
 
 // ─── Single warm-up / stretch card ────────────────────────────────────────────
 
@@ -682,14 +718,13 @@ function RoutineCard({
 
         {/* Right: thumbnail + info button — always rendered */}
         <div className="flex items-start gap-2 shrink-0">
-          <ExerciseImage
+          <AnimatedExerciseImage
             src={exercise.image}
             alt={exercise.name}
             accent={accent}
             accentBg={accentBg}
             accentBorder={accentBorder}
-            className="w-12 h-12"
-            fallbackClassName="w-12 h-12"
+            className="w-12 h-12 rounded-sm"
           />
           <DialogTrigger
             render={
@@ -721,15 +756,14 @@ function RoutineCard({
           </p>
         </DialogHeader>
 
-        {/* Exercise image — full width, always shown */}
-        <ExerciseImage
+        {/* Animated exercise image — full width */}
+        <AnimatedExerciseImage
           src={exercise.image}
           alt={exercise.name}
           accent={accent}
           accentBg={accentBg}
           accentBorder={accentBorder}
-          className="w-full h-52"
-          fallbackClassName="w-full h-52"
+          className="w-full h-52 rounded-sm"
         />
 
         {/* Step-by-step instructions */}
@@ -767,11 +801,13 @@ export default function LogWorkoutForm({
   exercises,
   recentlyUsedIds,
   lastSessions,
+  fitnessGoal,
 }: {
   date:             string;
   exercises:        Exercise[];
   recentlyUsedIds:  Record<SessionType, string[]>;
   lastSessions:     Record<string, LastSession>;
+  fitnessGoal?:     FitnessGoal | null;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -795,7 +831,7 @@ export default function LogWorkoutForm({
     const pool = exercises.filter(e =>
       SESSION_CONFIG[type].muscles.includes(e.muscleGroup),
     );
-    const picked = pickFresh(pool, recentlyUsedIds[type] ?? []);
+    const picked = pickFresh(pool, recentlyUsedIds[type] ?? [], fitnessGoal);
     setSelected(picked.map(ex => ({ exercise: ex, sets: [emptySet()] })));
     setSessionType(type);
     setShowCustomBuilder(false);
@@ -807,7 +843,7 @@ export default function LogWorkoutForm({
     const pool = exercises.filter(e =>
       SESSION_CONFIG[sessionType].muscles.includes(e.muscleGroup),
     );
-    const picked = pickFresh(pool, recentlyUsedIds[sessionType] ?? []);
+    const picked = pickFresh(pool, recentlyUsedIds[sessionType] ?? [], fitnessGoal);
     setSelected(picked.map(ex => ({ exercise: ex, sets: [emptySet()] })));
     setError(null);
   }
@@ -925,6 +961,30 @@ export default function LogWorkoutForm({
         </Button>
 
         <div>
+          {/* ── Goal context banner ───────────────────────────────────── */}
+          {fitnessGoal && GOAL_META[fitnessGoal] && (() => {
+            const gm = GOAL_META[fitnessGoal];
+            return (
+              <div
+                className="flex items-start gap-3 px-4 py-3 rounded-sm border mb-6 text-xs"
+                style={{ borderColor: `${gm.color}35`, background: `${gm.color}08` }}
+              >
+                <span style={{ color: gm.color, fontSize: "1rem", lineHeight: 1.3 }}>★</span>
+                <div>
+                  <span
+                    className="font-display tracking-[0.18em] block leading-none mb-1"
+                    style={{ color: gm.color, fontSize: "0.75rem" }}
+                  >
+                    GOAL: {gm.label}
+                  </span>
+                  <span className="text-muted-foreground tracking-wide">
+                    {gm.tagline}
+                  </span>
+                </div>
+              </div>
+            );
+          })()}
+
           <p className="text-xs text-muted-foreground tracking-[0.3em] uppercase mb-6">
             Choose your session
           </p>
@@ -949,37 +1009,54 @@ export default function LogWorkoutForm({
                     visible: { opacity: 1, y: 0,  scale: 1, transition: { type: "spring", stiffness: 110, damping: 14 } },
                   }}
                 >
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => handleTypeSelect(type)}
-                    className="w-full h-auto flex-col gap-3 py-10 border rounded-sm relative overflow-hidden"
-                    style={{
-                      borderColor: cfg.accentBorder,
-                      background:  cfg.accentBg,
-                    }}
-                  >
-                    {/* Animated top accent line */}
-                    <motion.span
-                      className="absolute top-0 left-0 right-0 h-[2px] origin-left"
-                      style={{ background: cfg.accent, boxShadow: `0 0 8px ${cfg.accent}80` }}
-                      initial={{ scaleX: 0 }}
-                      animate={{ scaleX: 1 }}
-                      transition={{ duration: 0.7, delay: 0.2, ease: [0.43, 0.13, 0.23, 0.96] }}
-                    />
-                    <span
-                      className="font-display tracking-[0.2em] leading-none"
-                      style={{ fontSize: "clamp(2rem, 6vw, 3rem)", color: cfg.accent }}
-                    >
-                      {cfg.label}
-                    </span>
-                    <span className="text-[10px] tracking-[0.25em] text-muted-foreground">
-                      {cfg.subtitle}
-                    </span>
-                    <span className="text-[10px] tracking-widest" style={{ color: cfg.accent, opacity: 0.6 }}>
-                      {type === "custom" ? "FULL EXERCISE BANK" : `45 MIN · ${EXERCISES_PER_SESSION} EXERCISES`}
-                    </span>
-                  </Button>
+                  {(() => {
+                    const isRecommended = fitnessGoal
+                      ? GOAL_META[fitnessGoal].sessions.includes(type)
+                      : false;
+                    const goalColor = fitnessGoal ? GOAL_META[fitnessGoal].color : cfg.accent;
+                    return (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => handleTypeSelect(type)}
+                        className="w-full h-auto flex-col gap-3 py-10 border rounded-sm relative overflow-hidden"
+                        style={{
+                          borderColor: isRecommended ? goalColor : cfg.accentBorder,
+                          background:  cfg.accentBg,
+                        }}
+                      >
+                        {/* Animated top accent line */}
+                        <motion.span
+                          className="absolute top-0 left-0 right-0 h-[2px] origin-left"
+                          style={{ background: isRecommended ? goalColor : cfg.accent, boxShadow: `0 0 8px ${cfg.accent}80` }}
+                          initial={{ scaleX: 0 }}
+                          animate={{ scaleX: 1 }}
+                          transition={{ duration: 0.7, delay: 0.2, ease: [0.43, 0.13, 0.23, 0.96] }}
+                        />
+                        {/* Recommended badge */}
+                        {isRecommended && (
+                          <span
+                            className="absolute top-3 right-3 text-[9px] font-mono tracking-[0.18em] px-2 py-0.5 rounded-sm border"
+                            style={{ color: goalColor, borderColor: `${goalColor}50`, background: `${goalColor}15` }}
+                          >
+                            ★ FOR YOUR GOAL
+                          </span>
+                        )}
+                        <span
+                          className="font-display tracking-[0.2em] leading-none"
+                          style={{ fontSize: "clamp(2rem, 6vw, 3rem)", color: cfg.accent }}
+                        >
+                          {cfg.label}
+                        </span>
+                        <span className="text-[10px] tracking-[0.25em] text-muted-foreground">
+                          {cfg.subtitle}
+                        </span>
+                        <span className="text-[10px] tracking-widest" style={{ color: cfg.accent, opacity: 0.6 }}>
+                          {type === "custom" ? "FULL EXERCISE BANK" : `45 MIN · ${EXERCISES_PER_SESSION} EXERCISES`}
+                        </span>
+                      </Button>
+                    );
+                  })()}
                 </motion.div>
               );
             })}
@@ -994,6 +1071,7 @@ export default function LogWorkoutForm({
     return (
       <CustomSessionBuilder
         exercises={exercises}
+        fitnessGoal={fitnessGoal}
         onStart={handleCustomStart}
         onBack={() => { setSessionType(null); setShowCustomBuilder(false); }}
       />
